@@ -1,0 +1,8 @@
+{
+    "order_finder_name": "default",
+    "order_finder_params": {
+        "order_method": "default"
+    },
+    "slicer_name": "default",
+    "compiler_params" : {"do_patch": false}
+}

@@ -1,0 +1,29 @@
+{
+    "order_finder_name" : "sliced",
+    "order_finder_params": {
+        "base_order_finder": {
+            "order_finder_name" : "khp",
+            "order_finder_params": {
+                "num_iters": 10,
+                "num_threads": 1,
+                "num_cmas": 1
+            }
+        },
+        "slicer":{
+            "slicer_name": "default",
+            "slicer_params": {
+                "num_iter_before": 30,
+                "num_iter_middle": 20,
+                "num_iter_after": 50,
+                "max_tw": 28,
+                "max_num_slice": 25,
+                "num_threads": 1
+            }
+        }
+    },
+    "compiler_params":{
+        "do_patch": true
+    },
+    "contractor_params":{
+    }
+}

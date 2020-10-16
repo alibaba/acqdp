@@ -1,0 +1,5 @@
+recursive-include acqdp *.ini *.json *.pyx
+prune demo
+prune examples
+prune benchmark
+global-exclude .DS_Store
