@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to Alibaba Cloud Quantum Development Platform (ACQDP)'s documentation!
-=========================================
+==============================================================================
 
 .. toctree::
    :maxdepth: 1

@@ -24,17 +24,7 @@ We are happy to be part of this effort.
 [See full documentation here.](https://alibabaquantumlab.github.io/acqdp)
 
 ## Installation
-### Installation from PyPI
-```bash
-pip install -U acqdp
-```
-
-### Installation from source code
-```bash
-git clone https://github.com/alibaba/acqdp
-cd adqdp
-pip install -e .
-```
+[See instructions here.](https://alibabaquantumlab.github.io/acqdp/installation.html)
 
 ## Contributing
 
