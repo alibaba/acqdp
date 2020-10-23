@@ -31,6 +31,13 @@ In a command window, run
 
    pip install cython
 
+`boost <https://www.boost.org>`__ - C++ boost library, particularly the `program_options <https://www.boost.org/doc/libs/1_58_0/doc/html/program_options.html>`__ library
+
+`KaHyPar python package <https://kahypar.org>`__  (Windows) - On non-Windows systems, it installs automatically 
+when installing acqdp but it'll error out on Windows. To make it work on Windows, you'll need manually install Kahypar 
+first following its instructions `here <https://github.com/kahypar/kahypar#the-python-interface>`__. Alternatively, you
+can use `Windows Subsystem for Linux <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`__
+
 Installation from PyPI
 **************************
 
@@ -61,18 +68,11 @@ Then install the ACQDP packages. Enter the `acqdp` folder and run
 
    pip install -e .
 
-Installation Issues
-****************************
-If you are installing on Windows, you may encounter an error when one of its dependencies, 
-`kahypar <https://pypi.org/project/kahypar>`__, is being installed. This is a limitation of kahypar.
-You may try to build it from its source code follow instructions 
-`here <https://github.com/kahypar/kahypar#requirements>`__
-
-
 Example and test codes
 ***********************
 
-You are ready to go! Find some examples at https://github.com/alibaba/acqdp/tree/master/examples
+You are ready to go! Find some examples at https://github.com/alibaba/acqdp/tree/master/examples and
+https://github.com/alibaba/acqdp/tree/master/demo
 
 To run the example in the examples folder examples/foo.py, run the following command in the home folder:
 
