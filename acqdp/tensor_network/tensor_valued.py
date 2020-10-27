@@ -34,7 +34,7 @@ def conjugate(t) -> 'TensorValued':
     elif isinstance(t, TensorView):
         return TensorView(t)
 
-def transpose(t, axes: tuple) -> 'TensorNetwork':
+def transpose(t, axes: tuple) -> 'TensorValued':
     """
     Return the transposition of a `TensorValued` object.
 
@@ -128,7 +128,7 @@ class TensorValued(object):
         else:
             return False
 
-    def __mul__(self, other) -> 'TensorNetwork':
+    def __mul__(self, other) -> 'TensorValued':
         """
         Tensor product of two tensors. For tensor multiplications, use
         `TensorNetwork` classes to specify how indices are to be contracted.
