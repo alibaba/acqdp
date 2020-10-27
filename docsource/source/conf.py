@@ -14,6 +14,7 @@
 #
 import os
 import sys
+from typing import Any
 sys.path.insert(0, os.path.abspath('../..'))
 
 
@@ -227,7 +228,7 @@ import sphinx.util.inspect
 
 object_description = sphinx.util.inspect.object_description
 
-def patched_object_description(object: 'Any') -> str:
+def patched_object_description(object: Any) -> str:
     if isinstance(object, list):
         return '[' + ', '.join(patched_object_description(x) for x in object) + ']'
     res = object_description(object)
