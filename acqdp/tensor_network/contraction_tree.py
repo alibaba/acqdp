@@ -1,9 +1,8 @@
 from acqdp.tensor_network.contraction import ContractionCost
-import copy
 import opt_einsum
 import sys
 import networkx
-from networkx.algorithms import max_weight_matching, ancestors, descendants
+from networkx.algorithms import max_weight_matching
 
 sys.setrecursionlimit(10**4)
 
@@ -15,8 +14,9 @@ CONTRACTION_TREE_PARAMS = {
 
 
 class ContractionTree:
-    """
-    Contraction tree corresponding to a pairwise sequential contraction, with interfaces for branch flipping and merging.
+    """Contraction tree corresponding to a pairwise sequential contraction, with interfaces for branch flipping and
+    merging.
+
     TODO: Merge with :class:`UndirectedContractionTree` for a unified interface for contraction trees.
     """
     @classmethod
@@ -25,10 +25,12 @@ class ContractionTree:
         tree_dic = {}
         edge_list = list(e[1] for e in tn_copy.edges)
         for node in tn_copy.nodes:
-            tree_dic[node[1]] = cls(subscripts=''.join([opt_einsum.get_symbol(edge_list.index(e)) for e in tn_copy.network.nodes[node]['edges']]), name=node[1])
+            tree_dic[node[1]] = cls(subscripts=''.join([opt_einsum.get_symbol(edge_list.index(e))
+                                                        for e in tn_copy.network.nodes[node]['edges']]), name=node[1])
         for o in order:
             stn_name, _ = tn_copy.encapsulate(o[0], stn_name=o[1])
-            tree_dic[stn_name] = cls(subscripts=''.join([opt_einsum.get_symbol(edge_list.index(e)) for e in tn_copy.network.nodes[(0, stn_name)]['edges']]), name=o[1], children=[tree_dic[i] for i in o[0]])
+            tree_dic[stn_name] = cls(subscripts=''.join([opt_einsum.get_symbol(edge_list.index(
+                e)) for e in tn_copy.network.nodes[(0, stn_name)]['edges']]), name=o[1], children=[tree_dic[i] for i in o[0]])
         return tree_dic['#']
 
     def __init__(self, subscripts=None, children=None, name=None):
@@ -41,7 +43,8 @@ class ContractionTree:
                 # c.parent = self
                 self.all_subscripts |= set(c.subs)
             self.children = sorted(self.children, key=lambda x: len(x.subs))
-        else: self.all_subscripts = self.subs
+        else:
+            self.all_subscripts = self.subs
 
     @property
     def subscripts(self):
@@ -53,20 +56,23 @@ class ContractionTree:
     @property
     def full_subscripts(self):
         res = []
-        if self.children is None: return res
+        if self.children is None:
+            return res
         for c in self.children[::-1]:
             res += c.full_subscripts
         return res + self.subscripts
 
     @property
     def order(self):
-        if self.children is None: return []
+        if self.children is None:
+            return []
         return [[[c.name for c in self.children], self.name]]
 
     @property
     def full_order(self):
         res = []
-        if self.children is None: return res
+        if self.children is None:
+            return res
         assert len(self.children) <= 2 and self not in self.children
         for c in self.children[::-1]:
             res += c.full_order
@@ -74,8 +80,10 @@ class ContractionTree:
 
     @property
     def step_cost(self):
-        if self.children is None: return ContractionCost(1, 1)
-        else: return ContractionCost(2**len(self.all_subscripts), 2**len(self.subs))
+        if self.children is None:
+            return ContractionCost(1, 1)
+        else:
+            return ContractionCost(2**len(self.all_subscripts), 2**len(self.subs))
 
     @property
     def total_cost(self):
@@ -95,7 +103,8 @@ class ContractionTree:
             branch0 = self.children[1].children[0]
             branch1 = self.children[0]
             imag_stem1_remain = ''.join(set(stem0.subs).union(branch1.subs).intersection(set(self.subs).union(branch0.subs)))
-            if len(imag_stem1_remain) < len(stem1.subs) or (len(imag_stem1_remain) == len(stem1.subs) and branch0.subs > branch1.subs):
+            if len(imag_stem1_remain) < len(stem1.subs) or (
+                    len(imag_stem1_remain) == len(stem1.subs) and branch0.subs > branch1.subs):
                 flg = True
                 imag_stem1 = ContractionTree(children=[branch1, stem0], subscripts=imag_stem1_remain, name=stem1.name)
                 self.children = [branch0, imag_stem1]
@@ -114,7 +123,7 @@ class ContractionTree:
                 res = [[self, self.subs]]
                 c = False
                 for cc in self.children:
-                    res.append([[cc, cc.subs]]+cc.branch_info(c))
+                    res.append([[cc, cc.subs]] + cc.branch_info(c))
             else:
                 return self.children[0].branch_info() + self.children[1].branch_info()
 
@@ -122,7 +131,7 @@ class ContractionTree:
             if self.children is not None:
                 m = set(self.children[0].subs).difference(self.children[1].subs)
                 n = set(self.children[0].subs).intersection(self.children[1].subs)
-                res.append([self.children[0],  ''.join(n), ''.join(m), self.children[1]])
+                res.append([self.children[0], ''.join(n), ''.join(m), self.children[1]])
             if self.children is not None:
                 for cc in self.children:
                     res += cc.branch_info(c)
@@ -140,12 +149,12 @@ class ContractionTree:
         for i, ss in enumerate(branches):
             if len(ss) > 2:
                 self.inter_names.append(ss[3].name)
-                g.add_node(i+1, branch=ss[0])
+                g.add_node(i + 1, branch=ss[0])
                 for n in ss[2]:
-                    g.add_edge(i+1 if i < ll-1 else -1, edges_dic[n], name=n)
+                    g.add_edge(i + 1 if i < ll - 1 else -1, edges_dic[n], name=n)
                     del edges_dic[n]
                 for n in ss[1]:
-                    edges_dic[n] = i+1
+                    edges_dic[n] = i + 1
         g.nodes[-1]['branch'] = ss[3]
         for n in edges_dic:
             g.add_edge(-1, edges_dic[n], name=n)
@@ -169,14 +178,14 @@ class ContractionTree:
             brb = [br[1], br[2]]
         m0, m1 = set(brb[0][0][1]), set(brb[1][0][1])
         i = 0
-        while (len(m0) + len(m1) - 2*len(m0.intersection(m1)) <= 12) and i < len(brb):
+        while (len(m0) + len(m1) - 2 * len(m0.intersection(m1)) <= 12) and i < len(brb):
             i += 1
             m0 = m0.union(brb[0][i][1]).difference(brb[0][i][2])
         if i > 1:
             k1 = brb[0][i][0]
             p1 = brb[1][0][0]
             br[0][0].children = [k1, brb[0][0][0]]
-            brb[0][i-1][3].children = [brb[0][i][3], p1]
+            brb[0][i - 1][3].children = [brb[0][i][3], p1]
             brb[0][i] = [brb[0][i][3], ''.join(m0)]
 
             brb[0] = brb[0][i:]
@@ -191,18 +200,18 @@ class ContractionTree:
                 for i, u in enumerate(g_list):
                     if u == 0 or u == -1 or i >= len(g_list) - 2:
                         continue
-                    vs = [list(g_list)[i+1] if list(g_list)[i+1]!= -1 else list(g_list)[-2]]
+                    vs = [list(g_list)[i + 1] if list(g_list)[i + 1] != -1 else list(g_list)[-2]]
                     vv = sorted([i for i in list(g.predecessors(u)) if i != -1])
                     if len(vv) > 0 and vv[0] != vs[0]:
                         vs.append(vv[0])
                         # if v == -1: continue
                     for v in vs:
-                        if g.in_degree(u) <= width and g.out_degree(v) <= width and g.out_degree(u)<=g.in_degree(u):
+                        if g.in_degree(u) <= width and g.out_degree(v) <= width and g.out_degree(u) <= g.in_degree(u):
                             ustr = g.nodes[u]['branch'].subs
                             vstr = g.nodes[v]['branch'].subs
                             kstr = set(ustr).symmetric_difference(vstr)
                             if 2**len(ustr) + 2**len(vstr) >= 2**(len(kstr)) / CONTRACTION_TREE_PARAMS['k']:
-                                a.add_edge(u, v, weight = 2**(-len(kstr)))
+                                a.add_edge(u, v, weight=2**(-len(kstr)))
 
                 matching = max_weight_matching(a)
                 if len(matching) == 0:
@@ -228,25 +237,26 @@ class ContractionTree:
                 a = networkx.Graph()
                 g_list = list(g.nodes)
                 for i, u in enumerate(g_list):
-                    if u == 0 or u == -1 or i <= 1: continue
-                    vs = [g_list[i-1]]
+                    if u == 0 or u == -1 or i <= 1:
+                        continue
+                    vs = [g_list[i - 1]]
                     vv = sorted([i for i in list(g.successors(u)) if i != 0])
                     if len(vv) > 0 and vv[-1] != vs[0]:
                         vs.append(vv[-1])
                     for v in vs:
                         # if v == 0: continue
-                        if g.out_degree(u) <= width and g.in_degree(v) <= width and g.in_degree(u)<=g.out_degree(u):
+                        if g.out_degree(u) <= width and g.in_degree(v) <= width and g.in_degree(u) <= g.out_degree(u):
                             ustr = g.nodes[u]['branch'].subs
                             vstr = g.nodes[v]['branch'].subs
                             kstr = set(ustr).symmetric_difference(vstr)
                             if 2**len(ustr) + 2**len(vstr) >= 2**(len(kstr)) / CONTRACTION_TREE_PARAMS['k']:
-                                a.add_edge(u,v, weight= 2**(-len(kstr)))
+                                a.add_edge(u, v, weight=2**(-len(kstr)))
 
                 matching = max_weight_matching(a)
                 if len(matching) == 0:
                     break
                 for u, v in matching:
-                    u,v = min(u,v), max(u,v)
+                    u, v = min(u, v), max(u, v)
                     bu = g.nodes[u]['branch']
                     bv = g.nodes[v]['branch']
                     subs = ''.join(set(bu.subs).difference(bv.subs) | set(bv.subs).difference(bu.subs))

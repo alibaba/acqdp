@@ -1,21 +1,26 @@
-import copy
 import numpy as np
 import opt_einsum
-from acqdp.tensor_network import ContractionTask, defaultOrderResolver, ContractionCost
+from acqdp.tensor_network import ContractionTask, defaultOrderResolver
 
 
 class Compiler:
-    """
-    Compile a :class:`ContractionScheme` indicating contraction scheme and sliced edges into a :class:`ContractionTask`, a hardware-aware format that can be readily used for tensor network contraction.
+    """Compile a :class:`ContractionScheme` indicating contraction scheme and sliced edges into a
+    :class:`ContractionTask`, a hardware-aware format that can be readily used for tensor network contraction.
 
-    Typically, a :class:`ContractionScheme` found by one of the :class:`OrderFinder` only aims to minimize the theoretical floating number operations and / or largest size of intermediate tensors.
-    Although those are typically accurate indicators of the overall contracion cost, they fail to accomodate inefficiencies from elsewhere.
-    The compiler takes care of machine-related inefficiencies by slightly modifying the order.
+    Typically, a :class:`ContractionScheme` found by one of the :class:`OrderFinder` only aims to minimize the theoretical
+    floating number operations and / or largest size of intermediate tensors. Although those are typically accurate indicators
+    of the overall contracion cost, they fail to accomodate inefficiencies from elsewhere. The compiler takes care of
+    machine-related inefficiencies by slightly modifying the order.
 
     :ivar do_patch: If set to false, the patching and reorganization of the contraction order below will be skipped.
-    :ivar patch_size: Whenever two adjacent branches both have size less than the patch size, the branches are merged together. This is to avoid inefficiency called by skewed tensor shapes in tensor multiplication, with a slight sacrifice in floating number operations.
-    :ivar reorg_thres: Threshold for contraction order reorganization. The order is seperated into small tensor multiplications and large tensor multiplications. All pairwise tensor multiplications involving tensors with size less than `reorg_thres` will be put forward whenever possible.
+    :ivar patch_size: Whenever two adjacent branches both have size less than the patch size, the branches are merged
+        together. This is to avoid inefficiency called by skewed tensor shapes in tensor multiplication, with a slight
+        sacrifice in floating number operations.
+    :ivar reorg_thres: Threshold for contraction order reorganization. The order is seperated into small tensor
+        multiplications and large tensor multiplications. All pairwise tensor multiplications involving tensors with size
+        less than `reorg_thres` will be put forward whenever possible.
     """
+
     def __init__(self,
                  reorg_thres=23,
                  patch_size=5,
@@ -56,7 +61,7 @@ class Compiler:
                     == 0) and edge_name not in tn_copy.open_edges:
                 tn_copy.network.remove_node((1, edge_name))
         init_order, final_order = self._order_patch(tn_copy.copy(), order, split,
-                                                   **kwargs)
+                                                    **kwargs)
         k = self._generate_template_fix(tn, [], data_ref)
         if isinstance(k, ContractionTask):
             return k
@@ -77,7 +82,7 @@ class Compiler:
 
         tn_copy.open_edges = [
             i for i in tn_copy.open_edges if (1, i) not in split
-            ]
+        ]
         for i in split:
             tn_copy.fix_edge(i[1])
         tn_copy.fix()
@@ -98,13 +103,13 @@ class Compiler:
                                                   optimize=path)
             lst[-1][3]['expr'] = expr
         res = ContractionTask(commands=lst,
-                               fix_dict=fix_dict,
-                               inputs=inputs,
-                               output=data_ref['#'],
-                               shape=tn.shape,
-                               open_edges=tn.open_edges,
-                               sub_outputs=tn_copy.open_edges,
-                               cnt=cnt)
+                              fix_dict=fix_dict,
+                              inputs=inputs,
+                              output=data_ref['#'],
+                              shape=tn.shape,
+                              open_edges=tn.open_edges,
+                              sub_outputs=tn_copy.open_edges,
+                              cnt=cnt)
         return res
 
     def _generate_template_fix(self, tn, split, data_ref):
@@ -147,7 +152,7 @@ class Compiler:
         if len(tn.nodes) == 0:
             id_node = np.array(1.)
             tn.add_node('*', [], id_node)
-            data_ref[(0,'*')] = [(0, id_node)]
+            data_ref[(0, '*')] = [(0, id_node)]
         for (i, edge) in enumerate(tn.open_edges):
             if edge not in open_edge_names:
                 open_edge_names.update({edge: 0})
@@ -162,7 +167,8 @@ class Compiler:
             if edge not in edges and open_edge_names[edge] == 0:
                 diag = [1.] * tn.network.nodes[(1, edge)]['dim']
             if 'fix_to' in tn.network.nodes[(1, edge)]:
-                diag = [1. if i in tn.network.nodes[(1, edge)]['fix_to'] else 0 for i in range(tn.network.nodes[(1, edge)]['dim'])]
+                diag = [1. if i in tn.network.nodes[(1, edge)]['fix_to']
+                        else 0 for i in range(tn.network.nodes[(1, edge)]['dim'])]
                 tn.network.nodes[(1, edge)].pop('fix_to')
             if diag is not None:
                 new_node = np.array(diag)
@@ -176,12 +182,13 @@ class Compiler:
             self._generate_template_delta(tn, data_ref)
         lhs = [data_ref[node] for node in tn.nodes]
 
-        return [('c', lhs, new_res, self._generate_template_einsum(tn, subscripts=tn.subscripts(), **kwargs), [node for node in tn.nodes])]
+        return [('c', lhs, new_res, self._generate_template_einsum(
+            tn, subscripts=tn.subscripts(), **kwargs), [node for node in tn.nodes])]
 
     def _generate_template_einsum(self, tn, subscripts, **kwargs):
         lhs_str, rhs_str, _ = subscripts
         command = ','.join(lhs_str) + '->' + rhs_str
-        return {'subscripts': command,  'dtype': tn.dtype}
+        return {'subscripts': command, 'dtype': tn.dtype}
 
     def _order_patch(self, tn, order, split_edges, **kwargs):
         if self.do_patch:
@@ -223,7 +230,7 @@ class Compiler:
         while True:
             for o in order:
                 if size_dic[o[1]] < self.reorg_thres and np.all(
-                    [a in node_set for a in o[0]]):
+                        [a in node_set for a in o[0]]):
                     init_order.append(o)
                     order.remove(o)
                     for a in o[0]:

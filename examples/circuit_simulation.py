@@ -83,16 +83,15 @@ def GRCS(f, in_state=0, simplify=False):
                                       0,
                                       math.cos(float(params[0])),
                                       -math.sin(float(params[0])) * 1j, 0
-                                  ],
-                                  [
+                        ],
+                            [
                                       0, -math.sin(float(params[0])) * 1j,
                                       math.cos(float(params[0])), 0
-                                  ],
-                                  [
+                        ],
+                            [
                                       0, 0, 0,
-                                      math.cos(-float(params[1])) +
-                                      math.sin(-float(params[1])) * 1j
-                                  ]]),
+                                      math.cos(-float(params[1])) + math.sin(-float(params[1])) * 1j
+                        ]]),
                         name='FSim'), target, layer)
         if simplify:
             for k in c.operations_by_name:
@@ -108,8 +107,13 @@ if __name__ == '__main__':
     parser.add_argument('circuit_file', help='the ciruit file (in .qsim format) to be simulated')
     parser.add_argument('-o', '--load-order', metavar='order_file', help='load a contraction order from a file')
     parser.add_argument('-s', '--save-order', metavar='order_file', help='save the contraction order to a file')
-    parser.add_argument('-a', '--num-amplitudes', metavar='N_a', default=1, type=int,
-                        help='number of amplitudes that would need to be sampled (used only to calculate the projected running time)')
+    parser.add_argument(
+        '-a',
+        '--num-amplitudes',
+        metavar='N_a',
+        default=1,
+        type=int,
+        help='number of amplitudes that would need to be sampled (used only to calculate the projected running time)')
 
     args = parser.parse_args()
 
@@ -128,7 +132,7 @@ if __name__ == '__main__':
     tn.open_edges = [tn.open_edges[i] for i in open_indices]
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(this_dir, 'khp_params.json'),'r') as f:
+    with open(os.path.join(this_dir, 'khp_params.json'), 'r') as f:
         kwargs = json.load(f)
     if args.load_order is not None:
         print(f'Loading order file {args.load_order}\n')

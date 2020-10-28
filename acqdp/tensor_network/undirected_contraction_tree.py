@@ -1,10 +1,13 @@
 import networkx as nx
 
+
 class UndirectedContractionTree:
-    """
-    Contraction tree corresponding to a pairwise sequential contraction order, with interfaces for branch flipping and merging.
+    """Contraction tree corresponding to a pairwise sequential contraction order, with interfaces for branch flipping
+    and merging.
+
     TODO: Merge this class with :class:`ContractionTree` for a unified interface on contraction trees.
     """
+
     def __init__(self, eq, path):
         lhs, rhs = eq.replace(' ', '').split('->')
         lhs = lhs.split(',')
@@ -17,7 +20,8 @@ class UndirectedContractionTree:
         self.graph.add_nodes_from((i, {'subscripts': set(x)}) for i, x in enumerate(lhs))
         t = self.n
         for i, j in path[:-1]:
-            if i > j: i, j = j, i
+            if i > j:
+                i, j = j, i
             v = operands.pop(j)
             u = operands.pop(i)
             self.graph.add_edge(u, t)
@@ -77,7 +81,8 @@ class UndirectedContractionTree:
         children = [c for c in self.graph[v] if c != parent]
         assert len(children) == 2
         s0, s1 = (self.open_subscripts_at_edge(v, c) for c in children)
-        if 'cost' in self.graph.nodes[v]: self.cost -= self.graph.nodes[v]['cost']
+        if 'cost' in self.graph.nodes[v]:
+            self.cost -= self.graph.nodes[v]['cost']
         self.graph.nodes[v]['cost'] = self.compute_cost(s0, s1, self.open_subscripts_at_edge(parent, v))
         self.cost += self.graph.nodes[v]['cost']
 
@@ -118,13 +123,15 @@ class UndirectedContractionTree:
             if self.graph.nodes[u]['parent'] == c0:
                 self.graph.nodes[v]['parent'] = c0
                 self.graph.nodes[u]['parent'] = v
-            if set(self.root) == {u, c0}: self.root = (v, c0)
+            if set(self.root) == {u, c0}:
+                self.root = (v, c0)
         self.graph[u][v].clear()
         self.preprocess_edge(u, v)
         self.preprocess_edge(v, u)
         self.compute_node_cost(u)
         self.compute_node_cost(v)
-        if set(self.root) == {u, v}: self.compute_root_cost()
+        if set(self.root) == {u, v}:
+            self.compute_root_cost()
 
     def step_root(self, u, v):
         if u not in self.root:
@@ -135,9 +142,9 @@ class UndirectedContractionTree:
         self.compute_root_cost()
 
     def detect_stem_in_subtree(self, u, v):
-        """
-        Detect the heaviest path in the subtree descending from the
-        edge (u, v), *and* the heaviest such path that ends at v.
+        """Detect the heaviest path in the subtree descending from the edge (u, v), *and* the heaviest such path that
+        ends at v.
+
         Return format is (cost, endpoint, endpoint), (cost, endpoint).
         """
         if self.is_leaf(v):
@@ -158,18 +165,14 @@ class UndirectedContractionTree:
         return self.stem
 
     def switch_branches(self, i):
-        """
-        Switch the branches at nodes i and i+1 of the stem.
-        """
+        """Switch the branches at nodes i and i+1 of the stem."""
         t0, u, v, t1 = self.stem[i - 1:i + 3]
         c0, = set(self.graph[u]) - {t0, v}
         c1, = set(self.graph[v]) - {u, t1}
         self.switch_edges((u, c0), (v, c1))
 
     def merge_branches(self, i):
-        """
-        Merge the branches at nodes i and i+1 of the stem.
-        """
+        """Merge the branches at nodes i and i+1 of the stem."""
         t0, u, v, t1 = self.stem[i - 1:i + 3]
         c0, = set(self.graph[u]) - {t0, v}
         self.switch_edges((u, c0), (v, t1))
@@ -177,11 +180,10 @@ class UndirectedContractionTree:
         return c0
 
     def unmerge_branches(self, i, c0=None):
-        """
-        Split the branch at node i of the stem into two branches, with
-        the sub-branch c0 now directly connecting to node i of the stem
-        and the other sub-branch connecting to node i+1 of the stem. By
-        default, use the sub-branch with smaller id as c0.
+        """Split the branch at node i of the stem into two branches, with the sub-branch c0 now directly connecting to
+        node i of the stem and the other sub-branch connecting to node i+1 of the stem.
+
+        By default, use the sub-branch with smaller id as c0.
         """
         t0, u, t1 = self.stem[i - 1:i + 2]
         v, = set(self.graph[u]) - {t0, t1}

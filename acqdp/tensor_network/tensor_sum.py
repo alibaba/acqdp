@@ -5,15 +5,14 @@ from .tensor_valued import TensorValued, DTYPE
 
 
 class TensorSum(TensorValued):
-    """
-    A :class:`TensorSum` object represents the summation of multiple tensors.
+    """A :class:`TensorSum` object represents the summation of multiple tensors.
 
-    :ivar terms_by_name: a dictionary with key-value pairs, where the key is the name of a summand and the value is the corresponding summand :class:`TensorValued` object.
+    :ivar terms_by_name: a dictionary with key-value pairs, where the key is the name of a summand and the value is the
+        corresponding summand :class:`TensorValued` object.
     """
+
     def __init__(self, terms=None, dtype: type = DTYPE) -> None:
-        """
-        The constructor of a `TensorSum` object.
-        """
+        """The constructor of a `TensorSum` object."""
         super().__init__(dtype)
         if terms is None:
             self.terms_by_name = OrderedDict()
@@ -47,10 +46,10 @@ class TensorSum(TensorValued):
 
     @property
     def shape(self):
-        """
-        The common property of all :class:`TensorValued` classes, yielding the shape of the object.
-        :class:`TensorValued` objects must have compatible shapes in order to be connected together in a :class:`TensorNetwork`,
-        or summed over in a :class:`TensorSum`.
+        """The common property of all :class:`TensorValued` classes, yielding the shape of the object.
+
+        :class:`TensorValued` objects must have compatible shapes in order to be connected together in a
+        :class:`TensorNetwork`, or summed over in a :class:`TensorSum`.
         """
         if not hasattr(self, '_cached_shape'):
             curr = None
@@ -62,10 +61,12 @@ class TensorSum(TensorValued):
 
     @property
     def is_valid(self):
-        """
-        The common property of all :class:`TensorValued` classes, indicating whether the :class:`TensorValued` object is valid or not.
-        In every step of a program, all existing :class:`TensorValued` object must be valid, otherwise an exception should be thrown out;
-        this property is for double checking that the current :class:`TensorValued` object is indeed valid.
+        """The common property of all :class:`TensorValued` classes, indicating whether the :class:`TensorValued` object
+        is valid or not.
+
+        In every step of a program, all existing :class:`TensorValued` object must be valid, otherwise an exception
+        should be thrown out; this property is for double checking that the current :class:`TensorValued` object is
+        indeed valid.
         """
         try:
             self.shape
@@ -76,11 +77,13 @@ class TensorSum(TensorValued):
 
     @property
     def is_ready(self):
-        """
-        The common property of all :class:`TensorValued` classes, indicating whether the current :class:`TensorValued` object is ready for
-        contraction, i.e. whether it semantically represents a tensor with a definite value.
-        In the process of a program, not all :class:`TensorValued` objects need to be ready; however once the `data` property of a certain object is queried,
-        such object must be ready in order to successfully yield an :class:`numpy.ndarray` object.
+        """The common property of all :class:`TensorValued` classes, indicating whether the current
+        :class:`TensorValued` object is ready for contraction, i.e. whether it semantically represents a tensor with a
+        definite value.
+
+        In the process of a program, not all :class:`TensorValued` objects need to be ready; however once the `data`
+        property of a certain object is queried, such object must be ready in order to successfully yield an
+        :class:`numpy.ndarray` object.
         """
         for t in self.terms_by_name.values():
             if not t.is_ready:
@@ -88,8 +91,7 @@ class TensorSum(TensorValued):
         return self.is_valid
 
     def add_term(self, term=None, tensor=None):
-        """
-        Add a term to the summation.
+        """Add a term to the summation.
 
         :param term: Name of the term to be added. If not given, an auto-assigned one will be given as the output.
         :type term: hashable
@@ -119,8 +121,7 @@ class TensorSum(TensorValued):
         return self
 
     def update_term(self, term, tensor=None):
-        """
-        Update the value of a term in the summation.
+        """Update the value of a term in the summation.
 
         :param term: Name of the term to be updated.
         :type term: hashable
@@ -139,8 +140,7 @@ class TensorSum(TensorValued):
         return term
 
     def remove_term(self, term):
-        """
-        Remove a term from the summation.
+        """Remove a term from the summation.
 
         :param term: Name of the term to be removed.
         :type term: hashable
@@ -151,9 +151,8 @@ class TensorSum(TensorValued):
         return pop
 
     def fix_index(self, index, fix_to=0):
-        """
-        Fix the given index to the given value. The result :class:`TensorValued` object would have the same type as the original one, with
-        rank 1 smaller than the original.
+        """Fix the given index to the given value. The result :class:`TensorValued` object would have the same type as
+        the original one, with rank 1 smaller than the original.
 
         :param index: The index to fix.
         :type index: :class:`int`.
@@ -175,8 +174,8 @@ class TensorSum(TensorValued):
         return self
 
     def contract(self, **kwargs):
-        """
-        Evaluate the object by summing over all the terms.
+        """Evaluate the object by summing over all the terms.
+
         :returns: :class:`numpy.ndarray`
         """
         res = [

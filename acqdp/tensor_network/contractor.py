@@ -1,31 +1,28 @@
 import inspect
-import copy
 import numpy
-import time
 from multiprocessing import Pool
 from functools import lru_cache
-from acqdp import tensor_network
 
 DEFAULT_ENGINE = 'numpy'
 
 
 @lru_cache(maxsize=None)
 def getDeployPlugin(pluginName):
-    """
-    plugin is just an installed python module that has "tensor_network" submodule
-    """
+    """plugin is just an installed python module that has "tensor_network" submodule."""
     import importlib
     res = importlib.import_module(pluginName)
     return res
 
 
 class Contractor:
-    """
-    Contractor class for tensor network contraction takes a :class:`ContractionTask` object and execute it sequentially.
-    For :class:`NetworkContractionTask`, multi-processing is available for further accelarate the computation.
+    """Contractor class for tensor network contraction takes a :class:`ContractionTask` object and execute it
+    sequentially. For :class:`NetworkContractionTask`, multi-processing is available for further accelarate the
+    computation.
 
-    :ivar backend: When set to `jax`, large tensor contractions will make use of the `jax` backend. `numpy.einsum` is used otherwise.
-    :ivar exeEngine: Extension interface for other contraction backends. Set to `None` by default. When set to `parallel`, subtasks will be computed simultaneously.
+    :ivar backend: When set to `jax`, large tensor contractions will make use of the `jax` backend. `numpy.einsum` is used
+        otherwise.
+    :ivar exeEngine: Extension interface for other contraction backends. Set to `None` by default. When set to `parallel`,
+        subtasks will be computed simultaneously.
     """
 
     def __init__(self, exeEngine=None, backend='default', dtype=complex, **kwargs):
@@ -33,10 +30,8 @@ class Contractor:
         self.backend = backend
         self.dtype = numpy.dtype(dtype)
 
-
     def execute(self, tasks, lst=None, **kwargs):
-        """
-        Execute a contraction task.
+        """Execute a contraction task.
 
         :param tasks: The task to be executed.
         :type tasks: :class:`acqdp.ContractionScheme`
@@ -68,11 +63,11 @@ class Contractor:
             return res
 
     def _execute(self,
-                      task,
-                      track=False,
-                      normalize=False,
-                      cnt=None,
-                      **kwargs):
+                 task,
+                 track=False,
+                 normalize=False,
+                 cnt=None,
+                 **kwargs):
         if cnt is None:
             commands = task.commands
         else:
@@ -102,7 +97,7 @@ class Contractor:
                                 res = kwargs['expr'](*[l[0][1] for l in lhs])
                         else:
                             res = numpy.array(numpy.einsum(kwargs['subscripts'],
-                                               *[l[0][1] for l in lhs]))
+                                                           *[l[0][1] for l in lhs]))
                     elif operation == 'n':
                         init_norm = 0
                         res = kwargs['func'](numpy.exp(lhs[0][0]) * lhs[0][1],
@@ -150,6 +145,7 @@ defaultContractor = Contractor()
 
 
 _defaultContractor = None
+
 
 def getDefault():
     global _defaultContractor

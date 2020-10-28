@@ -87,7 +87,7 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#html_theme = 'alabaster'
+# html_theme = 'alabaster'
 html_theme = 'bizstyle'
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -208,6 +208,7 @@ autodoc_member_order = 'bysource'
 # that are not in the list of accepted functions
 accepted_private_functions = ['__init__']
 
+
 def member_function_test(app, what, name, obj, skip, options):
     # test if we have a private function
     if len(name) > 1 and name[0] == '_':
@@ -221,12 +222,15 @@ def member_function_test(app, what, name, obj, skip, options):
                 return skip
         return False
 
+
 def setup(app):
     app.connect('autodoc-skip-member', member_function_test)
+
 
 import sphinx.util.inspect
 
 object_description = sphinx.util.inspect.object_description
+
 
 def patched_object_description(object: Any) -> str:
     if isinstance(object, list):
@@ -238,5 +242,6 @@ def patched_object_description(object: Any) -> str:
     if hasattr(object, 'name'):
         return f'{res} "{object.name}"'
     return f'<{res}>'
+
 
 sphinx.util.inspect.object_description = patched_object_description

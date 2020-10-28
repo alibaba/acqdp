@@ -1,5 +1,4 @@
 import numpy as np
-import pickle
 import tqdm
 import json
 from demo.QEC.surface_code import surface_code_tensor_network
@@ -8,7 +7,7 @@ from demo.QEC.surface_code import surface_code_tensor_network
 def computeErrorRate(params):
     tn = surface_code_tensor_network(num_layers=2, params=params)
     e_ro = params.get('e_ro', 0.01)
-    butterfly = np.array([[1-e_ro, e_ro],[e_ro, 1-e_ro]])
+    butterfly = np.array([[1 - e_ro, e_ro], [e_ro, 1 - e_ro]])
     with open('acqdp/tensor_network/khp_params.json', 'r') as f:
         kwargs = json.load(f)
     order = tn.find_order(input='task.json', output='task.json', **kwargs)

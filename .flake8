@@ -1,0 +1,8 @@
+[flake8]
+ignore = C901, #is too complex
+    E741, # ambiguous variable name
+    E402, # module level import not at top of file
+    W503 # line break before binary operator
+
+max-complexity = 15
+max-line-length = 127

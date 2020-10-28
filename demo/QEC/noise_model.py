@@ -1,11 +1,24 @@
 from acqdp.tensor_network import TensorNetwork
-from acqdp.circuit import Circuit, PureOperation, Trace, Channel, HGate, Depolarization, Diagonal, CZGate, State, Measurement
+from acqdp.circuit import CZGate, Channel, Circuit, Depolarization, Diagonal, HGate, Measurement, State
 import numpy as np
 
-default_params = {'T_1_inv': 1/30000.0, 'T_phi_inv': 1/60000.0, 'p_axis': 1e-4, 'p_plane': 5e-4, 'delta_phi': 0.01,
-                  'T_g_1Q': 20.0, 'T_g_2Q': 40.0, 'tau_m': 300.0, 'tau_d': 300.0, 'gamma': 0, 'alpha0': 4, 'kappa': 1 / 250, 'chi': 1.3 * 1e-3}
+default_params = {
+    'T_1_inv': 1 / 30000.0,
+    'T_phi_inv': 1 / 60000.0,
+    'p_axis': 1e-4,
+    'p_plane': 5e-4,
+    'delta_phi': 0.01,
+    'T_g_1Q': 20.0,
+    'T_g_2Q': 40.0,
+    'tau_m': 300.0,
+    'tau_d': 300.0,
+    'gamma': 0,
+    'alpha0': 4,
+    'kappa': 1 / 250,
+    'chi': 1.3 * 1e-3}
 
 X_TALK_GAMMA = False
+
 
 class IdleGate(Channel):
     def __init__(self, duration, params=default_params, ts=None):
@@ -42,7 +55,8 @@ def NoisyHGate(params=default_params, qubit=0):
         return HGate
     res = Circuit('NoisyH')
     res.append(HGate, [qubit])
-    res.append(Depolarization(params['p_axis'] / 4, params['p_plane']/2 - params['p_axis'] / 4, params['p_axis'] / 4), [qubit])
+    res.append(Depolarization(params['p_axis'] / 4, params['p_plane'] / 2 - params['p_axis'] / 4, params['p_axis'] / 4),
+               [qubit])
     return res
 
 
@@ -88,11 +102,8 @@ def add_idle_noise(circuit, start=None, end=None, params=default_params):
 
 
 def add_CZ_rotations(circuit, high_freq_group, low_freq_group, time_step=None, angles=None):
-    """
-    I will just assume that in the new net-zero gate, the quasi-static flux has a neglected effect.
-    So I changed Fang's implementation.
-    Now (angle == pi or None) is the CZ gate.
-    Very small angle is used to add cross-talk.
+    """I will just assume that in the new net-zero gate, the quasi-static flux has a neglected effect. So I changed
+    Fang's implementation. Now (angle == pi or None) is the CZ gate. Very small angle is used to add cross-talk.
 
     Maybe we can add some rotation error
     """
@@ -109,7 +120,8 @@ def add_CZ_rotations(circuit, high_freq_group, low_freq_group, time_step=None, a
             if abs(q1[0] - q2[0]) == 1 and abs(q1[1] - q2[1]) == 1:
                 circuit.append(gate, [q1, q2], time_step=time_step)
 
-C = TensorNetwork([0,0, 0, 0], bond_dim=2)
+
+C = TensorNetwork([0, 0, 0, 0], bond_dim=2)
 C.add_node('PH', [0], np.ones(2))
 NDCompMeas = Channel(1, C, name='ND')
 
@@ -172,7 +184,6 @@ def add_noisy_surface_code(circuit, qubit_coords=None, connections=None, time=No
                        ('D1', 'Z2', 'Z1', 'D4', 'D3')]:
         for g1, g2 in [flux_dance[0:2], flux_dance[2:4], (flux_dance[4], 'dummy')]:
             add_CZ_rotations(circuit, qubit_groups[g1], qubit_groups[g2], time_step=time, angles=gamma)
-
 
     # Time slot B
     time += T_g_1Q / 2

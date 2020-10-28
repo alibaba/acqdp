@@ -1,10 +1,8 @@
 from acqdp.tensor_network.local_optimizer import defaultOrderResolver, LocalOptimizer
-from acqdp.tensor_network.contraction import ContractionCost, ContractionScheme
+from acqdp.tensor_network.contraction import ContractionScheme
 from multiprocessing import Pool
 import copy
 import numpy
-import opt_einsum
-import tqdm
 
 
 class Slicer:
@@ -18,6 +16,7 @@ class Slicer:
     :ivar num_threads: Number of threads for multi-processing.
     :ivar slice_thres: Automatically slice edges that introduce an overhed below this threshold. Set to 0.02 by default.
     """
+
     def __init__(self,
                  num_iter_before=0,
                  num_iter_middle=20,
@@ -62,11 +61,11 @@ class Slicer:
                     if len(slice_edges) >= self.max_num_slice:
                         break
                     if numpy.log2(float(y.cost.t)) - self.max_tw + len(
-                            slice_edges) >= self.max_num_slice + 2: # early termination
+                            slice_edges) >= self.max_num_slice + 2:  # early termination
                         break
                 new_y = self.local_optimizer.optimize(
                     tn, y, self.num_iter_after)
-                new_y.cost.k=len(slice_edges)
+                new_y.cost.k = len(slice_edges)
                 if new_y.cost.t <= 2**self.max_tw:
                     y = new_y
                 if y.cost.t <= 2**self.max_tw:
@@ -79,9 +78,11 @@ class Slicer:
                 return None
 
     def _biggest_weight_edge(self, tn, order):
-        """
-        Find an edge or a list of edges, slicing of which introduces an overhead each that is below a threshold given by self.slice_thres, or a minimal overhead if self.slice_thres is unattainable.
-        The method enumerates all edges that appear frequently on the stem of the contraction tree. It tries to introduce as minimal overhead as possible by flipping branches on the stem while trying to slice the edges.
+        """Find an edge or a list of edges, slicing of which introduces an overhead each that is below a threshold given
+        by self.slice_thres, or a minimal overhead if self.slice_thres is unattainable.
+
+        The method enumerates all edges that appear frequently on the stem of the contraction tree. It tries to
+        introduce as minimal overhead as possible by flipping branches on the stem while trying to slice the edges.
         """
         tn_copy = tn.copy()
         tn_copy.fix()
@@ -214,9 +215,8 @@ def mpwrapper(slicer, tn, orders, num_process):
 
 
 class MPSlicer(Slicer):
-    """
-    Multi-processing slicing, by concurrently trying different slicing routes.
-    """
+    """Multi-processing slicing, by concurrently trying different slicing routes."""
+
     def slice(self, tn, order_gen):
         candidates = []
         while len(candidates) <= self.num_suc_candidates:

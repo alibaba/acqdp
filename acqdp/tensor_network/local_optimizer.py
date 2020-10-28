@@ -7,14 +7,15 @@ ORDER_RESOLVER_KWARGS = {'optimal': 8, 'dp': 20, 'thres': 1e8}
 
 
 class OrderResolver:
-    """
+    """Interfaces for conveniently converting between different formats of contraction orders. Also serves as a
+    converter from non-pairwise contraction orders to pairwise contraction orders.
 
-    Interfaces for conveniently converting between different formats of contraction orders. Also serves as a converter from non-pairwise contraction orders to pairwise contraction orders.
-
-    :ivar optimal: The maximum number of tensors in a single step of a non-pairwise order, for which brute-force search is used to reconstruct the pairwise order.
-    :ivar dp: The maximum number of tensors in a single step of a non-pairwise order, for which dynamic programming is used to reconstruct the pairwise order.
-    :ivar thres: The minimum cost of a non-pairwise contraction order via default path to invoke more advanced search for a pairwise order, such as the `dp` or `optimal` methods.
-
+    :ivar optimal: The maximum number of tensors in a single step of a non-pairwise order, for which brute-force search is
+        used to reconstruct the pairwise order.
+    :ivar dp: The maximum number of tensors in a single step of a non-pairwise order, for which dynamic programming is used
+        to reconstruct the pairwise order.
+    :ivar thres: The minimum cost of a non-pairwise contraction order via default path to invoke more advanced search for a
+        pairwise order, such as the `dp` or `optimal` methods.
     """
 
     def __init__(self,
@@ -97,7 +98,8 @@ class OrderResolver:
             c = len(set(sub[0][1]).intersection(sub[0][0]).difference(sub[1]))
             d = len(set(sub[0][1]).intersection(sub[0][0]).intersection(sub[1]))
             steps.append(
-                f'Step {i}: <{a+b+c+d}> {sub[0][0]}[{a} x {c} x {d}] * {sub[0][1]}[{c} x {b} x {d}] -> {sub[1]}[{a} x {b} x {d}] \n {order[i]}'
+                f'Step {i}: <{a+b+c+d}> {sub[0][0]}[{a} x {c} x {d}] * {sub[0][1]}[{c} x {b} x {d}]'
+                f' -> {sub[1]}[{a} x {b} x {d}] \n {order[i]}'
             )
         return '\n'.join(steps)
 
@@ -105,9 +107,9 @@ class OrderResolver:
         optimize = None
         try:
             path, path_info = opt_einsum.contract_path(','.join(lhs) + '->' + rhs,
-                                                    *shapes,
-                                                    shapes=True,
-                                                    optimize='auto')
+                                                       *shapes,
+                                                       shapes=True,
+                                                       optimize='auto')
         except ValueError as e:
             print(','.join(lhs) + '->' + rhs, shapes)
             raise e
@@ -118,9 +120,9 @@ class OrderResolver:
                 optimize = 'dp'
         if optimize is not None:
             path, path_info = opt_einsum.contract_path(','.join(lhs) + '->' + rhs,
-                                                    *shapes,
-                                                    shapes=True,
-                                                    optimize=optimize)
+                                                       *shapes,
+                                                       shapes=True,
+                                                       optimize=optimize)
         return path, ContractionCost(path_info.opt_cost,
                                      path_info.largest_intermediate)
 
@@ -150,9 +152,16 @@ defaultOrderResolver = OrderResolver()
 class LocalOptimizer:
     """
 
-    :class:`LocalOptimizer` takes a pairwise contraction tree and do local optimization on the tree. Note that a connected subgraph of the contraction tree represents a sequence of intermediate steps that take some (potentially intermediate) tensors as input, and outputs a later intermediate tensor. This sequence of steps can be optimized based on solely the shapes of the input and output tensors associated to the subgraph, without looking at the rest of the contraction tree. This allows local reorganization of the tree.
+    :class:`LocalOptimizer` takes a pairwise contraction tree and do local optimization on the tree. Note that a connected
+        subgraph of the contraction tree represents a sequence of intermediate steps that take some (potentially intermediate)
+        tensors as input, and outputs a later intermediate tensor. This sequence of steps can be optimized based on solely the
+        shapes of the input and output tensors associated to the subgraph, without looking at the rest of the contraction
+        tree. This allows local reorganization of the tree.
 
-    Each iteration of local optimization consists of two steps: In the first step, the contraction tree is divided into non-overlapping subgraphs each up to a given size, with the internal connections in the subgraphs removed. The internal connections are then reconstructed in the second phase using accelerated optimum contraction tree finding approach. The iterations can be repeated by each time randomly selecting a different patch of subgraph division.
+    Each iteration of local optimization consists of two steps: In the first step, the contraction tree is divided into
+    non-overlapping subgraphs each up to a given size, with the internal connections in the subgraphs removed. The internal
+    connections are then reconstructed in the second phase using accelerated optimum contraction tree finding approach. The
+    iterations can be repeated by each time randomly selecting a different patch of subgraph division.
 
     :ivar size: The maximum number of nodes to be included in one subgraph.
     :ivar resolver: The resolver to help reconstruct the pairwise order from subgraph divisions.
@@ -207,8 +216,8 @@ class LocalOptimizer:
     def optimize(self, tn, order, num_iter):
         for _ in range(num_iter):
             new_order = self._flatten_order(tn,
-                                           order.order,
-                                           offset=np.random.randint(
-                                               self.size))
+                                            order.order,
+                                            offset=np.random.randint(
+                                                self.size))
             order = self.resolver.order_to_contraction_scheme(tn, new_order)
         return order

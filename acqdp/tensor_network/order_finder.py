@@ -1,16 +1,4 @@
-import subprocess
-import os
-import copy
 import sys
-import string
-import random
-import networkx as nx
-import itertools
-import numpy as np
-import opt_einsum
-import json
-from functools import cmp_to_key
-from acqdp.tensor_network.contraction import ContractionScheme
 from acqdp.tensor_network.local_optimizer import defaultOrderResolver
 
 if sys.version_info < (3, 0):
@@ -21,31 +9,37 @@ if sys.version_info < (3, 0):
 class OrderFinder:
     """
     :class:`OrderFinder` class is dedicated to finding a contraction scheme corresponding to a given tensor network structure.
-    The main method of an :class:`OrderFinder` is `find_order`, which takes a `TensorNetwork` as input, and yields a generator of `ContractionScheme`.
-    The base class offers preliminary order finding schemes. For more advanced hypergraph-based approach, use :class:`KHPOrderFinder`. For finding contraction schemes with sliced edges, use :class:`SlicedOrderFinder`.
+        The main method of an :class:`OrderFinder` is `find_order`, which takes a `TensorNetwork` as input, and yields a
+        generator of `ContractionScheme`.The base class offers preliminary order finding schemes. For more advanced
+        hypergraph-based approach, use :class:`KHPOrderFinder`. For finding contraction schemes with sliced edges,
+        use :class:`SlicedOrderFinder`.
 
-    :ivar order_method: 'default' order contracts the tensor one by one by order; 'vertical' order contracts the tensor based on the vertical ordering. When the tensor network is from a quantum circuit, the vertical order corresponds to the tensor network contraction where the tensors connected to a qubit is first contracted together and then merged to a main one according to a given order of the qubits.
+    :ivar order_method: 'default' order contracts the tensor one by one by order; 'vertical' order contracts the tensor based
+        on the vertical ordering. When the tensor network is from a quantum circuit, the vertical order corresponds to the
+        tensor network contraction where the tensors connected to a qubit is first contracted together and then merged to a
+        main one according to a given order of the qubits.
     """
+
     def __init__(self,
                  order_method='default',
                  **kwargs):
         self.order_method = order_method
 
     def find_order(self, tn, **kwargs):
-        """
-        Find a contraction scheme for the input tensor network subject to the constraints given in the :class:`OrderFinder`.
+        """Find a contraction scheme for the input tensor network subject to the constraints given in the
+        :class:`OrderFinder`.
 
         :param tn: A tensor network for which the contraction scheme is to be determined.
         :type tn: :class:`TensorNetwork`
-        :yields: A :class:`ContractionScheme` containing the pairwise contraction order, a list of edges to be sliced, and optionally the total contraction cost.
-
+        :yields: A :class:`ContractionScheme` containing the pairwise contraction order, a list of edges to be sliced, and
+            optionally the total contraction cost.
         """
         tn = tn._expand_and_delta()
         if self.order_method == 'default':
-            a = lambda b: b
+            a = lambda b: b  # noqa: E731
         elif self.order_method == 'vertical':
             qubit_order = kwargs.get('qubit_order', sorted(set(b[1] for b in tn.nodes_by_name)))
-            a = lambda b: (qubit_order.index(b[1]), b[0], b[2:])
+            a = lambda b: (qubit_order.index(b[1]), b[0], b[2:])  # noqa: E731
         else:
             raise ValueError("order method not implemented")
         try:
@@ -68,11 +62,14 @@ class OrderFinder:
 
 class SlicedOrderFinder(OrderFinder):
     """
-    :class: `SlicedOrderFinder` finds a sliced contraction scheme based on unsliced contraction schemes found by its base order finder.
-    :ivar base_order_finder: The base order finder of the sliced order finder, from which the `SlicedOrderFinder` fetches contraction schemes and do slicing on it.
+    :class: `SlicedOrderFinder` finds a sliced contraction scheme based on unsliced contraction schemes found by its base
+        order finder.
+    :ivar base_order_finder: The base order finder of the sliced order finder, from which the `SlicedOrderFinder` fetches
+        contraction schemes and do slicing on it.
     :ivar slicer: The slicing algorithm acting upon the contraction schemes.
     :ivar num_candidates: Number of unsliced contraction schemes to feed to the slicer at a time. Set to 20 by default.
     """
+
     def __init__(self,
                  base_order_finder={'order_finder_name': 'khp'},
                  slicer={'slicer_name': 'default'},

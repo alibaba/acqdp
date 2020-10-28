@@ -1,9 +1,9 @@
 from acqdp.circuit.circuit import Channel, Circuit
 import numpy as np
 
+
 def Depolarization(px=0.25, py=None, pz=None):
-    """
-    Single-qubit depolarizing channel.
+    """Single-qubit depolarizing channel.
 
     :param px: One of the three parameters to describe the single-qubit depolarizing channel.
     :type px: :class:`float`.
@@ -27,8 +27,7 @@ def Depolarization(px=0.25, py=None, pz=None):
 
 
 def Dephasing(pz=0.5):
-    """
-    Single-qubit dephasing channel, also called the phase-damping channel.
+    """Single-qubit dephasing channel, also called the phase-damping channel.
 
     :param pz: The parameter to describe the single-qubit dephasing channel.
     :type pz: :class:`float`.
@@ -40,10 +39,10 @@ def Dephasing(pz=0.5):
 def AmplitudeDampling(p=0.1):
     res = Channel(
         1,
-        np.array([[[[1, 0], [0, np.sqrt(1-p)]],
+        np.array([[[[1, 0], [0, np.sqrt(1 - p)]],
                    [[0, p], [0, 0]]],
                   [[[0, 0], [0, 0]],
-                   [[np.sqrt(1-p), 0], [0, 1-p]]]]))
+                   [[np.sqrt(1 - p), 0], [0, 1 - p]]]]))
     return res
 
 

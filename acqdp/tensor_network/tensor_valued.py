@@ -1,12 +1,10 @@
-import copy
 import numpy
-from . import contractor
 
 DTYPE = complex
 
+
 def conjugate(t) -> 'TensorValued':
-    """
-    Return the complex conjugation of a `TensorValued` object.
+    """Return the complex conjugation of a `TensorValued` object.
 
     :returns:  :class:`TensorValued` -- the conjugation of a `TensorValued` object.
     """
@@ -34,13 +32,14 @@ def conjugate(t) -> 'TensorValued':
     elif isinstance(t, TensorView):
         return TensorView(t)
 
+
 def transpose(t, axes: tuple) -> 'TensorValued':
-    """
-    Return the transposition of a `TensorValued` object.
+    """Return the transposition of a `TensorValued` object.
 
     :param axes: the transposition on the referred object.
     :type axes: tuple.
-    :returns:  :class:`TensorNetwork` -- the transposition of a `TensorValued` object can be readily expressed in terms of a `TensorNetwork` object.
+    :returns:  :class:`TensorNetwork` -- the transposition of a `TensorValued` object can be readily expressed in terms of a
+        `TensorNetwork` object.
     """
     from .tensor_network import TensorNetwork
     tn = TensorNetwork()
@@ -48,19 +47,20 @@ def transpose(t, axes: tuple) -> 'TensorValued':
     tn.open_edges = [tn.open_edges[i] for i in axes]
     return tn
 
+
 def normalize(tv: 'TensorValued') -> 'TensorValued':
-    """
-    Return a copy with unit Frobenius norm.
+    """Return a copy with unit Frobenius norm.
 
     :param tv: The :class:`TensorValued` object to normalize.
     :type tv: :class:`TensorValued`.
     :returns:  :class:`TensorValued` -- the normalized :class:`TensorValued` object.
     """
-    return tv * (1/numpy.sqrt(tv.norm_squared))
+    return tv * (1 / numpy.sqrt(tv.norm_squared))
+
 
 class TensorValued(object):
-    """
-    Interface for all :class:`TensorValued` objects, including :class:`Tensor`, :class:`TensorNetwork`, :class:`TensorSum` and :class:`TensorView`.
+    """Interface for all :class:`TensorValued` objects, including :class:`Tensor`, :class:`TensorNetwork`,
+    :class:`TensorSum` and :class:`TensorView`.
 
     :ivar identifier: unique identifier for each :class:`TensorValued` object.
     :ivar dtype: A :class:`TensorValued` object is homogeneous, and contains elements described by a dtype object.
@@ -78,10 +78,13 @@ class TensorValued(object):
 
     @property
     def shape(self):
-        """
-        The common property of all :class:`TensorValued` classes, indicating whether the bond dimensions for a tensor valued object. A tensor valued object is semantically a multi-dimensionally array, and its dimensions can be expressed as a tuple of integers. The tuple is called the shape of the tensor, whereas the length of the tuple is the rank of the tensor.
+        """The common property of all :class:`TensorValued` classes, indicating whether the bond dimensions for a tensor
+        valued object. A tensor valued object is semantically a multi-dimensionally array, and its dimensions can be
+        expressed as a tuple of integers. The tuple is called the shape of the tensor, whereas the length of the tuple
+        is the rank of the tensor.
 
-        In ACQDP, undetermined tensors and undetermined dimensions are allowed. In the former case, the shape of the tensor will return `None`; in the latter case, some of the bond_dimensions appearing in the tuple could be `None`.
+        In ACQDP, undetermined tensors and undetermined dimensions are allowed. In the former case, the shape of the tensor
+        will return `None`; in the latter case, some of the bond_dimensions appearing in the tuple could be `None`.
 
         :returns: :class:`tuple` or None
         :raises: NotImplementedError, ValueError
@@ -90,9 +93,9 @@ class TensorValued(object):
 
     @property
     def is_valid(self) -> bool:
-        """
-        The common property of all :class:`TensorValued` classes, indicating whether the :class:`TensorValued` object is valid or not.
-        In every step of a program, all existing :class:`TensorValued` object must be valid, otherwise an exception should be thrown out.
+        """The common property of all :class:`TensorValued` classes, indicating whether the :class:`TensorValued` object
+        is valid or not. In every step of a program, all existing :class:`TensorValued` object must be valid, otherwise
+        an exception should be thrown out.
 
         :returns: :class:`bool`
         :raises: NotImplementedError
@@ -101,10 +104,10 @@ class TensorValued(object):
 
     @property
     def is_ready(self) -> bool:
-        """
-        The common property of all :class:`TensorValued` classes, indicating whether the current :class:`TensorValued` object is ready for
-        contraction, i.e. whether it semantically represents a tensor with a definite value.
-        A `TensorValued` object needs to be ready upon contraction, but needs not to be ready throught the construction.
+        """The common property of all :class:`TensorValued` classes, indicating whether the current
+        :class:`TensorValued` object is ready for contraction, i.e. whether it semantically represents a tensor with a
+        definite value. A `TensorValued` object needs to be ready upon contraction, but needs not to be ready throught
+        the construction.
 
         :returns: :class:`bool`
         :raises: NotImplementedError()
@@ -129,10 +132,8 @@ class TensorValued(object):
             return False
 
     def __mul__(self, other) -> 'TensorValued':
-        """
-        Tensor product of two tensors. For tensor multiplications, use
-        `TensorNetwork` classes to specify how indices are to be contracted.
-        By default, addition creates a `TensorNetwork` object with two operands as two components.
+        """Tensor product of two tensors. For tensor multiplications, use `TensorNetwork` classes to specify how indices
+        are to be contracted. By default, addition creates a `TensorNetwork` object with two operands as two components.
 
         :returns: :class:`TensorNetwork`
         """
@@ -145,9 +146,10 @@ class TensorValued(object):
     __rmul__ = __mul__
 
     def __add__(self, other: 'TensorValued') -> 'TensorValued':
-        """
-        Addition of two `TensorValued` objects.
-        By default, addition creates a `TensorSum` object with two operands as two components. The two operands of the addition must have compatible shapes.
+        """Addition of two `TensorValued` objects.
+
+        By default, addition creates a `TensorSum` object with two operands as two components. The two operands of the
+        addition must have compatible shapes.
         """
         from .tensor_sum import TensorSum
         tl = TensorSum()
@@ -173,9 +175,7 @@ class TensorValued(object):
 
     @property
     def norm_squared(self):
-        """
-        Square of Frobenius norm of the :class:`TensorValued` object.
-        """
+        """Square of Frobenius norm of the :class:`TensorValued` object."""
         from .tensor_network import TensorNetwork
         tn = TensorNetwork()
         tn.add_node(tensor=self)
@@ -183,9 +183,8 @@ class TensorValued(object):
         return tn.contract().real
 
     def fix_index(self, index, fix_to=0) -> 'TensorValued':
-        """
-        Fix the given index to the given value. The result :class:`TensorValued` object would have the same type as the original one, with rank 1 smaller
-        than the original.
+        """Fix the given index to the given value. The result :class:`TensorValued` object would have the same type as
+        the original one, with rank 1 smaller than the original.
 
         :param index: The index to fix.
         :type index: :class:`int`
@@ -197,15 +196,14 @@ class TensorValued(object):
         raise NotImplementedError()
 
     def expand(self):
-        """
-        Expand nested tensor network structures in the :class:`TensorValued` object if there is any.
+        """Expand nested tensor network structures in the :class:`TensorValued` object if there is any.
+
         :returns: :class:`TensorValued`.
         """
         return self
 
     def contract(self, **kwargs) -> numpy.ndarray:
-        """
-        Evaluate the :class:`TensorValued` object to a :class:`numpy.ndarray`.
+        """Evaluate the :class:`TensorValued` object to a :class:`numpy.ndarray`.
 
         :returns: :class:`numpy.ndarray`
         :raises: NotImplementedError
@@ -213,14 +211,14 @@ class TensorValued(object):
         raise NotImplementedError()
 
     def cast(self, dtype):
-        """
-        Cast the tensor valued object to a new underlying dtype.
-        """
+        """Cast the tensor valued object to a new underlying dtype."""
         self.dtype = dtype
 
     def copy(self) -> 'TensorValued':
-        """Make a copy of the current object. Data is duplicated only when
-        necessary."""
+        """Make a copy of the current object.
+
+        Data is duplicated only when necessary.
+        """
         raise NotImplementedError()
 
     def __deepcopy__(self, memo) -> 'TensorValued':

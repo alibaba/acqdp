@@ -4,6 +4,7 @@ import numpy as np
 from scipy.stats import unitary_group
 from acqdp.circuit import noise
 
+
 class CircuitTestCase(unittest.TestCase):
     def test_basic(self):
         c = circuit.Circuit()
