@@ -8,10 +8,10 @@ from .kahypar_order_finder import KHPOrderFinder
 from .slicer import Slicer, MPSlicer
 
 from .contraction import (ContractionCost, ContractionScheme,
-                                         ContractionTask)
+                          ContractionTask)
 
 from .local_optimizer import (LocalOptimizer, OrderResolver,
-                                             defaultOrderResolver)
+                              defaultOrderResolver)
 
 from .compiler import Compiler
 

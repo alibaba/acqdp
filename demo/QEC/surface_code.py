@@ -1,16 +1,23 @@
 from acqdp.tensor_network import TensorNetwork
 import numpy as np
-from copy import copy, deepcopy
-from acqdp.circuit import CompState, HGate, XGate, ZGate, ZeroMeas, OneMeas, ZeroState, PlusState, CNOTGate, CompMeas, CZGate, YGate, Circuit, Measurement, Unitary, Diagonal, Channel, Trace, Dephasing, ZRotation, State, ZZRotation, ImmutableOperation
-from demo.QEC.noise_model import add_noisy_surface_code, add_idle_noise, IdleGate
-import pickle
+from acqdp.circuit import CNOTGate, CZGate, Circuit, HGate, Measurement, PlusState, State, Trace, ZeroMeas, ZeroState
+from demo.QEC.noise_model import add_idle_noise, add_noisy_surface_code
 
-import time
 
-from ast import literal_eval as make_tuple
-
-params = {'T_1_inv': 1/30000.0, 'T_phi_inv': 1/60000.0, 'p_axis': 1e-4, 'p_plane': 5e-4, 'delta_phi': 0.01,
-                  'T_g_1Q': 20.0, 'T_g_2Q': 40.0, 'tau_m': 300.0, 'tau_d': 300.0, 'gamma': 0, 'alpha0': 4, 'kappa': 1 / 250, 'chi': 1.3 * 1e-3}
+params = {
+    'T_1_inv': 1 / 30000.0,
+    'T_phi_inv': 1 / 60000.0,
+    'p_axis': 1e-4,
+    'p_plane': 5e-4,
+    'delta_phi': 0.01,
+    'T_g_1Q': 20.0,
+    'T_g_2Q': 40.0,
+    'tau_m': 300.0,
+    'tau_d': 300.0,
+    'gamma': 0,
+    'alpha0': 4,
+    'kappa': 1 / 250,
+    'chi': 1.3 * 1e-3}
 
 Z = TensorNetwork([0, 0])
 Z.add_node('PH', [0], np.ones(2))
@@ -29,8 +36,10 @@ qubit_group_name = {
     (-1, -1): 'dummy'
 }
 qubit_groups = {group: [] for group in qubit_group_name.values()}
-qubit_coords = [(x * 2, y * 2) for x in range(3) for y in range(3)] + [(-1, 3)] + [(x * 2 + 1, y * 2 + 1)
-                                                                                   for x in range(2) for y in (range(3) if x % 2 else range(-1, 2))] + [(5, 1)]
+qubit_coords = ([(x * 2, y * 2) for x in range(3) for y in range(3)]
+                + [(-1, 3)]
+                + [(x * 2 + 1, y * 2 + 1) for x in range(2) for y in (range(3) if x % 2 else range(-1, 2))]
+                + [(5, 1)])
 
 for x, y in qubit_coords:
     qubit_groups[qubit_group_name[x % 4, y % 4]].append((x, y))
@@ -43,10 +52,9 @@ def add_CZ_gates(circuit, high_freq_group, low_freq_group):
                 circuit.append(CZGate, [q1, q2])
                 break
 
+
 def x_stab_meas(circuit, measure_outcome=None, use_ndcompmeas=False):
-    """
-    This is currently only used to add a round of X-stabilier measurement circuit without noise
-    """
+    """This is currently only used to add a round of X-stabilier measurement circuit without noise."""
 
     for group in ['D1', 'D2', 'D3', 'D4', 'X1', 'X2']:
         for qubit in qubit_groups[group]:
@@ -127,8 +135,9 @@ def z_stab_meas(circuit, measure_outcome=None, use_ndcompmeas=False):
 
 
 def initial_state(coord=(-100, -100)):
-    """
-    prepare a maximally entangled state between surface code and ancilla qubit. First prepare |0>_surf |+>_anc, then do a few CNOT
+    """prepare a maximally entangled state between surface code and ancilla qubit.
+
+    First prepare |0>_surf |+>_anc, then do a few CNOT
     """
     c = Circuit()
 
@@ -145,17 +154,17 @@ def initial_state(coord=(-100, -100)):
 
 
 def final_measurement(circuit: Circuit):
-    for q in [(1,1),(1,-1),(3,3),(3,1),(-1,3),(5,1),(1,3),(3,5)]:
+    for q in [(1, 1), (1, -1), (3, 3), (3, 1), (-1, 3), (5, 1), (1, 3), (3, 5)]:
         circuit.append(Trace, [q])
         circuit.append(ZeroState, [q])
     x_stab_meas(circuit, use_ndcompmeas=True)  # Add final noiseless X-stabilizer measurements
-    for qubits in [[(1,1),(0, 0)], [(3,3),(4, 4)], [(-1,3),(0, 4)], [(5,1),(4, 0)]]:
+    for qubits in [[(1, 1), (0, 0)], [(3, 3), (4, 4)], [(-1, 3), (0, 4)], [(5, 1), (4, 0)]]:
         circuit.append(CZGate, qubits)
         circuit.append(Trace, [qubits[0]])
         circuit.append(TraceState, [qubits[0]])
 
     z_stab_meas(circuit, use_ndcompmeas=True)  # Add final noiseless Z-stabilizer measurements
-    for qubits in [[(1, -1), (0, 0)], [(3,1), (4, 0)], [(1,3),(0, 4)], [(3,5), (4, 4)]]:
+    for qubits in [[(1, -1), (0, 0)], [(3, 1), (4, 0)], [(1, 3), (0, 4)], [(3, 5), (4, 4)]]:
         circuit.append(CNOTGate, qubits)
         circuit.append(Trace, [qubits[0]])
         circuit.append(TraceState, [qubits[0]])
@@ -167,7 +176,7 @@ def surface_code_tensor_network(num_layers=2, params=params):
     end_time = 0
     for _ in range(num_layers):
         end_time = add_noisy_surface_code(noisy_meas_circ, qubit_coords, time=end_time, params=params)
-    add_idle_noise(noisy_meas_circ,params=params)
+    add_idle_noise(noisy_meas_circ, params=params)
     d = final_measurement(noisy_meas_circ)
     init_state = initial_state()
     c_prob = init_state | d | initial_state(coord=(-101, -101)).adjoint()
@@ -180,7 +189,7 @@ def surface_code_tensor_network(num_layers=2, params=params):
 
 def surface_code_tensor_network_with_syndrome(syndrome=None, num_layers=2, params=params):
     if syndrome is None:
-        syndrome = [0] * (8 * (num_layers+1))
+        syndrome = [0] * (8 * (num_layers + 1))
     noisy_meas_circ = Circuit()
     e_ro = params.get('e_ro', 0.01)
     butterfly = np.array([[1 - e_ro, e_ro], [e_ro, 1 - e_ro]])

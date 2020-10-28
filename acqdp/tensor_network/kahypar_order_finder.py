@@ -1,21 +1,15 @@
 import kahypar
-import opt_einsum as oe
 import numpy
-from numpy import random
 import itertools
 import copy
 from os.path import join, abspath, dirname
 import cma
 import os
 import tempfile
-import pickle
 from multiprocessing import Pool
-import cProfile
-from scipy import sparse
-from acqdp.utility import opt_einsum_ext
 
 from acqdp.tensor_network.local_optimizer import OrderResolver
-from acqdp.tensor_network.contraction import ContractionScheme, ContractionCost, OrderCounter
+from acqdp.tensor_network.contraction import ContractionScheme, OrderCounter
 from acqdp.tensor_network.order_finder import OrderFinder
 
 CMA_TEMP_DIR = tempfile.TemporaryDirectory()
@@ -40,27 +34,29 @@ def query(order_finder,
     mode = s % 2
     tg, nodes = graph_copy.tanner_graph
     order = order_finder._order_by_params(numpy.array(tg.todense()),
-                                         copy.copy(nodes),
-                                         K=K,
-                                         eps=eps,
-                                         mode=mode,
-                                         objective=0,
-                                         cutoff=cutoff,
-                                         seed=seed,
-                                         counter=counter)
+                                          copy.copy(nodes),
+                                          K=K,
+                                          eps=eps,
+                                          mode=mode,
+                                          objective=0,
+                                          cutoff=cutoff,
+                                          seed=seed,
+                                          counter=counter)
     res = queryOrderResolver.order_to_contraction_scheme(graph_copy, order)
     return res
 
 
 class KHPOrderFinder(OrderFinder):
     """
-    :class:`KHPOrderFinder` utilizes hypergraph decomposition and cma-es opmization scheme for finding contraction orders for intermediate-size tensor networks.
+    :class:`KHPOrderFinder` utilizes hypergraph decomposition and cma-es opmization scheme for finding contraction orders for
+        intermediate-size tensor networks.
 
     :ivar num_threads: Number of threads to concurrently search for the best order.
     :ivar num_iters: Number of iterations for cma optimization.
     :ivar num_cmas: Number of times cma-es optimization scheme is called for exploring better parameter combinations.
     :ivar cma_args: Arguments for cma-es optimization scheme. See the documentation of cma for more details
-    :ivar eps: In case a good parameter combination is already known, inputting a eps would skip the cma optimization scheme and directly yield orders found by hypergraph decomposition.
+    :ivar eps: In case a good parameter combination is already known, inputting a eps would skip the cma optimization scheme
+        and directly yield orders found by hypergraph decomposition.
     """
 
     def __init__(
@@ -136,8 +132,7 @@ class KHPOrderFinder(OrderFinder):
             curr_y = None
             for _ in range(self.num_cmas):
                 seed_f = numpy.random.uniform(0, 1)
-                self.cma_args['kwargs']['seed'] = numpy.random.randint(2**31 -
-                                                                       1)
+                self.cma_args['kwargs']['seed'] = numpy.random.randint(2**31 - 1)
 
                 def probe_value(x):
                     res = probe([x[0], x[1], seed_f])
@@ -199,13 +194,13 @@ class KHPOrderFinder(OrderFinder):
                 new_stn = counter.cnt
                 all_names.append(new_stn)
                 new_g, graph, nodes = self._sub(graph, nodes, partite_nodes,
-                                               new_stn)
+                                                new_stn)
                 assert graph.shape[0] == len(nodes) + 1, (graph.shape[0],
                                                           len(nodes))
                 kwargs['top'] = False
                 if len(partite_nodes) > cutoff:
                     new_order = self._order_by_params(new_g, partite_nodes,
-                                                     **kwargs)
+                                                      **kwargs)
                     new_order[-1][1] = new_stn
                 else:
                     new_order = [[partite_nodes, new_stn]]

@@ -1,7 +1,6 @@
 import json
 import numpy as np
 import copy
-import opt_einsum
 from acqdp.tensor_network.contractor import defaultContractor
 
 
@@ -13,6 +12,7 @@ class ContractionCost:
     :ivar t: Size of largest intermediate tensor, as a proxy for the space complexity.
     :ivar k: Number of indices sliced, as a proxy for the parallelism
     """
+
     def __init__(self, s=0, t=0, k=0):
         self.s = s
         self.t = t
@@ -39,11 +39,14 @@ class ContractionCost:
 
 class ContractionScheme:
     """
-    :class:`ContractionScheme` is an intermediate representation of a tensor network contraction, containing the pairwise contraction orders, the hyperedges to be sliced, and the cost of the contraction. A :class:`ContractionScheme` does not contain tensor data.
+    :class:`ContractionScheme` is an intermediate representation of a tensor network contraction, containing the pairwise
+        contraction orders, the hyperedges to be sliced, and the cost of the contraction. A :class:`ContractionScheme` does
+        not contain tensor data.
 
     :ivar order: The pairwise sequential contraction order.
     :ivar slices: The hyperedges to be sliced for parallelism.
-    :ivar cost: :class:`ContractionCost` -- The time / space cost and number of sub-processes of the tensor network contraction.
+    :ivar cost: :class:`ContractionCost` -- The time / space cost and number of sub-processes of the tensor network
+        contraction.
     """
 
     def __init__(self, order, slices=None, cost=None):
@@ -56,8 +59,7 @@ class ContractionScheme:
         self.cost = cost
 
     def dump(self, f):
-        """
-        Dump the :class:`ContractionScheme` into a json file.
+        """Dump the :class:`ContractionScheme` into a json file.
 
         :param f: The file to dump the :class:`ContractionScheme` to.
         """
@@ -72,8 +74,7 @@ class ContractionScheme:
 
     @classmethod
     def load(cls, f):
-        """
-        Load a :class:`ContractionScheme` from an existing file.
+        """Load a :class:`ContractionScheme` from an existing file.
 
         :param f: The file to load the :class:`ContractionScheme` from.
 
@@ -111,8 +112,11 @@ class OrderCounter:
 
 class ContractionTask:
     """
-    :class:`ContractionTask` is post-compilation intermediate representation for tensor network contraction, with all the information necessary to carry out a tensor network contraction, including initial tensor data and stepwise instruction of the contraction.
+    :class:`ContractionTask` is post-compilation intermediate representation for tensor network contraction, with all the
+        information necessary to carry out a tensor network contraction, including initial tensor data and stepwise
+        instruction of the contraction.
     """
+
     def __init__(self,
                  output,
                  inputs=None,
@@ -160,7 +164,6 @@ class ContractionTask:
         self.length = length
         self.dtype = np.dtype(dtype)
 
-
     def _merge(self, res_dic):
         if self.length == 1 or len(self.shape) == 0 or self.open_edges is None:
             return sum([res_dic[k] for k in res_dic])
@@ -192,8 +195,10 @@ class ContractionTask:
         return res
 
     def update_fix(self, tn):
-        """
-        Update the tensor index fixes according to the input tensor network. Use when the contraction task corresponds to the same tensor network with different fix configurations. One example of the use case is when the contraction task is for an entry of the amplitude of a quantum circuit, whereas the tensor network represents the same quantum circuit with a different amplitude entry.
+        """Update the tensor index fixes according to the input tensor network. Use when the contraction task
+        corresponds to the same tensor network with different fix configurations. One example of the use case is when
+        the contraction task is for an entry of the amplitude of a quantum circuit, whereas the tensor network
+        represents the same quantum circuit with a different amplitude entry.
 
         :param tn: The tensor network to update the fixes to.
         :type tn: :class:`TensorNetwork`.
@@ -231,17 +236,18 @@ class ContractionTask:
         return self
 
     def set_data(self, data):
-        """
-        Update the data in the contractions. Use when a connectivity of a tensor network remains unaltered but the tensor data is changed.
+        """Update the data in the contractions. Use when a connectivity of a tensor network remains unaltered but the
+        tensor data is changed.
 
-        :param data: a dictionary of tensor data, with keys being their names in the tensor network, and values the corresponding tensor data.
+        :param data: a dictionary of tensor data, with keys being their names in the tensor network, and values the
+            corresponding tensor data.
         :type data: dict
         """
         self.data = {d: np.array(data[d], dtype=self.dtype) for d in data}
 
     def cast(self, dtype):
-        """
-        Cast the contraction to a different type. All input tensors will be cast to the type, and therefore all steps of contraction will be of the type, together with the final result.
+        """Cast the contraction to a different type. All input tensors will be cast to the type, and therefore all steps
+        of contraction will be of the type, together with the final result.
 
         :param dtype: The dtype to cast the computations to.
         :type dtype: `str` or `type`
@@ -251,8 +257,7 @@ class ContractionTask:
         self.set_data(self.data)
 
     def __getitem__(self, idx):
-        """
-        Get a subtask induced by slicing as another :class:`ContractionTask`.
+        """Get a subtask induced by slicing as another :class:`ContractionTask`.
 
         :param idx: Index of the subtask.
         :type idx: int
@@ -278,9 +283,9 @@ class ContractionTask:
         return self_copy
 
     def execute(self, **kwargs):
-        """
-        Execute a :class:`ContractionTask`. Equivalent to :meth:`Contractor(**kwargs).execute(self)`.
+        """Execute a :class:`ContractionTask`.
 
+        Equivalent to :meth:`Contractor(**kwargs).execute(self)`.
         """
         from acqdp.tensor_network.contractor import Contractor
         return Contractor(**kwargs.get('contractor_params', {})).execute(self)

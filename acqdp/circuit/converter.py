@@ -1,13 +1,13 @@
 from .circuit import (Operation,
-                              ImmutableOperation,
-                              PureOperation,
-                              Circuit,
-                              ControlledOperation,
-                              Controlled,
-                              ControlledCircuit,
-                              CompState,
-                              CompMeas,
-                              SuperPosition)
+                      ImmutableOperation,
+                      PureOperation,
+                      Circuit,
+                      ControlledOperation,
+                      Controlled,
+                      ControlledCircuit,
+                      CompState,
+                      CompMeas,
+                      SuperPosition)
 
 from acqdp.tensor_network.tensor_valued import TensorValued
 
@@ -15,23 +15,17 @@ from acqdp.tensor_network.tensor_sum import TensorSum
 
 from acqdp.tensor_network.tensor_network import TensorNetwork
 
-import numpy as np
-
 
 class Converter:
-    """
-    Generic converter class, with method mapping a circuit to
-    a tensor network.
-    """
+    """Generic converter class, with method mapping a circuit to a tensor network."""
     @classmethod
     def convert_pure(cls, operation: Operation) -> TensorValued:
-        """
-        Do a pure conversion for noiseless circuit described as a :class:`Operation` object to a tensor network as a :class:`TensorValued` object.
+        """Do a pure conversion for noiseless circuit described as a :class:`Operation` object to a tensor network as a
+        :class:`TensorValued` object.
 
         :param operation: the noisy circuit to convert.
         :type operation: :class:`Operation`.
         :returns:  :class:`TensorValued` -- the tensor network to describe the input noisy circuit.
-
         """
         if not operation.is_pure:
             raise ValueError("Invalid operation: trying to do pure conversion for noisy circuit")
@@ -93,7 +87,7 @@ class Converter:
                     for i in op._output_indices[0]:
                         q = qubits[i]
                         if q not in dic:
-                            dic_out[q] = (time_step+1, idx, q)
+                            dic_out[q] = (time_step + 1, idx, q)
                             out_edges.append(dic_out[q])
                         else:
                             edge = dic.pop(q)
@@ -120,13 +114,12 @@ class Converter:
 
     @classmethod
     def convert_control(cls, operation: PureOperation) -> TensorValued:
-        """
-        Do a control conversion for noisy circuit described as a :class:`Operation` object to a tensor network as a :class:`TensorValued` object.
+        """Do a control conversion for noisy circuit described as a :class:`Operation` object to a tensor network as a
+        :class:`TensorValued` object.
 
         :param operation: the noisy circuit to convert.
         :type operation: :class:`Operation`.
         :returns:  :class:`TensorValued` -- the tensor network to describe the input noisy circuit.
-
         """
         if not operation.is_pure:
             raise ValueError("Noisy operation does not have pure block-diagonal form")
@@ -137,13 +130,12 @@ class Converter:
 
     @classmethod
     def convert_density(cls, operation: Operation) -> TensorValued:
-        """
-        Do a density conversion for noisy circuit described as a :class:`Operation` object to a tensor network as a :class:`TensorValued` object.
+        """Do a density conversion for noisy circuit described as a :class:`Operation` object to a tensor network as a
+        :class:`TensorValued` object.
 
         :param operation: the noisy circuit to convert.
         :type operation: :class:`Operation`.
         :returns:  :class:`TensorValued` -- the tensor network to describe the input noisy circuit.
-
         """
         if isinstance(operation, PureOperation):
             tp = operation.tensor_pure

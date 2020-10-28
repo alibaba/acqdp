@@ -7,7 +7,7 @@ import math
 from acqdp.tensor_network.tensor_valued import TensorValued
 from acqdp.tensor_network.tensor import Tensor
 from acqdp.tensor_network.tensor_network import TensorNetwork
-from typing import List, Dict, Optional, Set
+from typing import List, Optional
 
 
 INDENT = "  "
@@ -70,7 +70,8 @@ class Operation(object):
         are themselves :class:`Circuit` instances.
         """
         if isinstance(other, Operation):
-            return Circuit().append(self, list(range(len(self.shape))), 0).append(other, list(range(len(self.shape), len(self.shape) + len(other.shape))), 0)
+            return Circuit().append(self, list(range(len(self.shape))), 0).append(
+                other, list(range(len(self.shape), len(self.shape) + len(other.shape))), 0)
         else:
             return NotImplemented
 
@@ -121,8 +122,8 @@ class Operation(object):
 
     @property
     def tensor_pure(self):
-        """Convert the operation into a tensor network representing the action
-        of the operation in the pure state picture.
+        """Convert the operation into a tensor network representing the action of the operation in the pure state
+        picture.
 
         Examples of tensor representations in the pure state picture include
         state vectors of pure states, and unitary matrices of unitary gates.
@@ -134,23 +135,21 @@ class Operation(object):
 
     @property
     def tensor_density(self):
-        """Convert the operation into a tensor network representing the action
-        of the operation in the density matrix picture.
+        """Convert the operation into a tensor network representing the action of the operation in the density matrix
+        picture.
 
-        Examples of tensor representations in the density matrix picture include
-        density matrices of general quantum states, and Choi matrices of quantum
-        operations. As a special case, when the operation is pure, the tensor
-        network returned by :attr:`tensor_density` will consist of two disjoint
-        components, one being the tensor network returned by :attr:`tensor_pure`
-        and the other being its adjoint.
+        Examples of tensor representations in the density matrix picture include density matrices of general quantum
+        states, and Choi matrices of quantum operations. As a special case, when the operation is pure, the tensor
+        network returned by :attr:`tensor_density` will consist of two disjoint components, one being the tensor network
+        returned by :attr:`tensor_pure` and the other being its adjoint.
         """
         from .converter import Converter
         return Converter.convert_density(self)
 
     @property
     def tensor_control(self):
-        """Convert a controlled operation into a tensor network in the pure
-        state picture, but with only one open edge for each controlling qubit.
+        """Convert a controlled operation into a tensor network in the pure state picture, but with only one open edge
+        for each controlling qubit.
 
         A qubit in an operation can be regarded as a controlling qubit if its
         value in the computational basis is never changed by the operation. As
@@ -167,8 +166,9 @@ class Operation(object):
         return Converter.convert_control(self)
 
     def adjoint(self):  # pragma: no cover
-        """Return the adjoint of a quantum operation. ``~op`` is an alias of
-        ``op.adjoint()``.
+        """Return the adjoint of a quantum operation.
+
+        ``~op`` is an alias of ``op.adjoint()``.
         """
         raise NotImplementedError()
 
@@ -177,8 +177,7 @@ class Operation(object):
 
 
 class ImmutableOperation(Operation):
-    """Class for quantum operations with explicit tensor representations. The
-    operation is not supposed to be modified.
+    """Class for quantum operations with explicit tensor representations. The operation is not supposed to be modified.
 
     :param data: A tensor representation of the operation. For this base class,
         it will be the tensor returned by :attr:`~Operation.tensor_density`.
@@ -211,8 +210,7 @@ class ImmutableOperation(Operation):
         return str(vars(self))
 
     def process(self, data):
-        """Convert the input data into an appropriately shaped tensor, and
-        initialize the operation with this tensor.
+        """Convert the input data into an appropriately shaped tensor, and initialize the operation with this tensor.
 
         A derived class that uses a different tensor representation of the
         operation should override this function in order to do shape checking
@@ -256,7 +254,6 @@ class ImmutableOperation(Operation):
         :returns: A quantum operation constructed from the given Kraus operator
             representation.
         :rtype: ImmutableOperation
-
         """
         lin = len([i for i in shape if i[0] == 'i'])
         lout = len([i for i in shape if i[-1] == 'o'])
@@ -302,7 +299,6 @@ class State(ImmutableOperation):
 
     :ivar name: Name of the quantum state. Defaults to "State".
     :vartype name: str, optional
-
     """
 
     def __init__(self,
@@ -531,6 +527,7 @@ class ControlledOperation(PureOperation):
         False.
     :vartype self_adjoint: bool, optional
     """
+
     def __init__(self,
                  data: np.ndarray,
                  shape: List[str],
@@ -588,6 +585,7 @@ class Diagonal(ControlledOperation):
     :ivar self_adjoint: Whether the gate is self-adjoint. Defaults to False.
     :vartype self_adjoint: bool, optional
     """
+
     def __init__(self,
                  num_cbits,
                  data: np.ndarray,
@@ -649,8 +647,8 @@ YHalfGate = Unitary(1,
 """Single-qubit :math:`\\sqrt{Y}` gate."""
 
 CNOTGate = ControlledOperation(np.array([[[1, 0], [0, 1]], [[0, 1], [1, 0]]]),
-                             ['c', 'io'],
-                             "CNOT", True)
+                               ['c', 'io'],
+                               "CNOT", True)
 """Two-qubit CNOT gate."""
 
 ZeroState = PureState(1, np.array([1, 0]), '|0>')
@@ -662,10 +660,10 @@ OneState = PureState(1, np.array([0, 1]), '|1>')
 CompState = [ZeroState, OneState]
 """List of the computational basis states, :math:`|0\\rangle` and :math:`|1\\rangle`."""
 
-PlusState = PureState(1, np.array([1/np.sqrt(2), 1/np.sqrt(2)]), '|+>')
+PlusState = PureState(1, np.array([1 / np.sqrt(2), 1 / np.sqrt(2)]), '|+>')
 """Single-qubit state :math:`|+\\rangle`."""
 
-MinusState = PureState(1, np.array([1/np.sqrt(2), -1/np.sqrt(2)]), '|->')
+MinusState = PureState(1, np.array([1 / np.sqrt(2), -1 / np.sqrt(2)]), '|->')
 """Single-qubit state :math:`|-\\rangle`."""
 
 FourierState = [PlusState, MinusState]
@@ -689,7 +687,7 @@ MinusMeas = PureMeas(1, np.array([1 / np.sqrt(2), -1 / np.sqrt(2)]), '<-|')
 FourierMeas = [PlusMeas, MinusMeas]
 """List of the computational basis measurements, :math:`\\langle +|` and :math:`\\langle -|`."""
 
-NDCompMeas = Channel(1, TensorNetwork([0,0,0,0], bond_dim=2), 'ND')
+NDCompMeas = Channel(1, TensorNetwork([0, 0, 0, 0], bond_dim=2), 'ND')
 """A non-destructive computational basis measurement.
 
 This is equivalent to :class:`acqdp.circuit.noise.Dephasing()`, but with a
@@ -716,11 +714,12 @@ class XRotation(Unitary):
     :ivar angle: The rotation angle :math:`\\theta`.
     :vartype angle: float
     """
+
     def __init__(self, angle):
         self.angle = angle
         Unitary.__init__(self, 1,
                          np.array([[np.cos(angle), 1j * np.sin(angle)],
-                                  [1j * np.sin(angle), np.cos(angle)]]),
+                                   [1j * np.sin(angle), np.cos(angle)]]),
                          "R_X")
 
     def adjoint(self):
@@ -740,6 +739,7 @@ class ZRotation(Diagonal):
     :ivar angle: The rotation angle :math:`\\theta`.
     :vartype angle: float
     """
+
     def __init__(self, angle):
         self.angle = angle
         Diagonal.__init__(self, 1,
@@ -751,8 +751,7 @@ class ZRotation(Diagonal):
 
 
 class Circuit(Operation):
-    """Class for quantum circuits that can be manipulated by adding and removing
-    operations.
+    """Class for quantum circuits that can be manipulated by adding and removing operations.
 
     Each operation in a circuit has a name that is unique within the circuit,
     not necessarily related to its own :attr:`name` attribute. Each operation
@@ -775,6 +774,7 @@ class Circuit(Operation):
           circuit the operation is applied to.
     :vartype operations_by_name: Dict[hashable, dict]
     """
+
     def __init__(self, name='Circuit') -> None:
         Operation.__init__(self, name)
         self.operations_by_name = {}
@@ -822,7 +822,7 @@ class Circuit(Operation):
             name = (time_step,
                     tuple([q for q in qubits]))
         if (len(qubits) != len(set(qubits))
-           or len(qubits) != len(operation.shape)):
+                or len(qubits) != len(operation.shape)):
             raise ValueError("Invalid qubits: qubits not match operation.")
         self.operations_by_name[name] = {"operation": operation,
                                          "time_step": time_step,
@@ -831,8 +831,9 @@ class Circuit(Operation):
 
     @property
     def operations_by_time(self):
-        """Return an :class:`OrderedDict` of dicts, which is an reorganization
-        of :attr:`operations_by_name` such that ``c.operations_by_time[t][name]
+        """Return an :class:`OrderedDict` of dicts, which is an reorganization of :attr:`operations_by_name` such that
+        ``c.operations_by_time[t][name]
+
         == c.operations_by_name[name]``, where ``t`` is the time step of the
         operation in question.
 
@@ -886,7 +887,8 @@ class Circuit(Operation):
                 gate = self.operations_by_name[gate_name]
                 for i, qubit in enumerate(gate['qubits']):
                     if last_time_used[qubit] >= time_step:
-                        raise ValueError("Invalid connection: Qubit {} used multiple times at timestep {}".format(qubit, time_step))
+                        raise ValueError(
+                            "Invalid connection: Qubit {} used multiple times at timestep {}".format(qubit, time_step))
                     last_time_used[qubit] = time_step
                     shape[qubit] += "".join([trans_dict[letter] for letter in gate['operation'].shape[i]])
         pattern = re.compile("^o?(io)*i?$")
@@ -899,8 +901,7 @@ class Circuit(Operation):
 
     @property
     def is_valid(self) -> bool:
-        """
-        Return True if the circuit is valid.
+        """Return True if the circuit is valid.
 
         See :attr:`shape` for ways a circuit can be invalid.
         """
@@ -960,6 +961,7 @@ class ControlledCircuit(ControlledOperation):
         controlling qubit is in the :math:`|1\\rangle` state.
     :vartype conditioned_on: bool, optional
     """
+
     def __init__(self,
                  circuit,
                  name=None,
@@ -983,8 +985,7 @@ class ControlledCircuit(ControlledOperation):
 
     @property
     def is_valid(self):
-        """
-        Return True if the circuit is valid.
+        """Return True if the circuit is valid.
 
         See :attr:`Circuit.shape` for ways a circuit can be invalid.
         """
@@ -1048,8 +1049,8 @@ class SuperPosition(Operation):
 
     :ivar name: Name of the superposition operation. Defaults to "SuperPos".
     :vartype name: str, optional
-
     """
+
     def __init__(self,
                  operations,
                  coefs=None,

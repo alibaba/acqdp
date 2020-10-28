@@ -1,4 +1,4 @@
-from acqdp.tensor_network import TensorNetwork, Tensor
+from acqdp.tensor_network import TensorNetwork
 from scipy import optimize
 import numpy
 import time
@@ -11,9 +11,7 @@ def XRot(angle):
 
 
 def checkinstance(csp):
-    """
-        Check if a given instance is valid.
-        """
+    """Check if a given instance is valid."""
     if type(csp) != dict:
         print("Instance has to be a dictionary and it has type ",
               type(csp))
@@ -40,13 +38,11 @@ def checkinstance(csp):
 
 
 class QAOAOptimizer:
-    """
-    Quantum variational optimization algorithm for CSP optimization, using the Quantum Approximate Optimization Algorithm ansatz.
-    """
+    """Quantum variational optimization algorithm for CSP optimization, using the Quantum Approximate Optimization
+    Algorithm ansatz."""
+
     def __init__(self, csp, params=None, num_layers=2):
-        """
-        Constructor of :class:`CSPQAOAOptimizer` class.
-        """
+        """Constructor of :class:`CSPQAOAOptimizer` class."""
         if params is None:
             params = 2 * numpy.pi * numpy.random.rand(2 * num_layers)
         self.set_task(csp, num_layers, params)
@@ -74,23 +70,22 @@ class QAOAOptimizer:
 
     @classmethod
     def lightcone(cls, qubits, csp, num_layers):
-        """
-        Construct simplified tensor network corresponding to all QAOA circuit element acting non-trivially on a set of qubits.
-        """
+        """Construct simplified tensor network corresponding to all QAOA circuit element acting non-trivially on a set
+        of qubits."""
         qubits_set = set(qubits)
         turns = {}
         tn = TensorNetwork(dtype=complex)
         for i in range(num_layers):
             for qubit in qubits_set:
-                tn.add_node((i + 1, qubit, False), [(i, qubit), (i+1, qubit)], None)
-                tn.add_node((-i - 1, qubit, False), [(-i, qubit), (-i-1, qubit)], None)
+                tn.add_node((i + 1, qubit, False), [(i, qubit), (i + 1, qubit)], None)
+                tn.add_node((-i - 1, qubit, False), [(-i, qubit), (-i - 1, qubit)], None)
             clauses = []
             new_set = set()
             for clause in csp:
                 if set(clause).intersection(qubits_set):
                     clauses.append(clause)
                     new_set |= set(clause)
-                    tn.add_node((i + 1, clause, True), [(i+1, q) for q in clause], None)
+                    tn.add_node((i + 1, clause, True), [(i + 1, q) for q in clause], None)
                     tn.add_node((-i - 1, clause, True), [(-i - 1, q) for q in clause], None)
             turns.update({qubit: i + 1 for qubit in new_set.difference(qubits_set)})
             qubits_set |= new_set
@@ -100,9 +95,8 @@ class QAOAOptimizer:
         return tn, qubits_set
 
     def decorate(self, params=None):
-        '''
-        Assign specific values to the relavant tensor networks (specified by `tn.dict`) according to the input paramter values.
-        '''
+        """Assign specific values to the relavant tensor networks (specified by `tn.dict`) according to the input
+        paramter values."""
         if params is None:
             params = self.params
         betas = params[:self.num_layers]
@@ -134,9 +128,7 @@ class QAOAOptimizer:
         return {clause: task}, {clause: dic}
 
     def preprocess(self, **kwargs):
-        """
-        Preprocessing for calculating the energy value of the QAOA circuit.
-        """
+        """Preprocessing for calculating the energy value of the QAOA circuit."""
         time_start = time.time()
         print("Preprocessing for energy query...")
 
@@ -154,9 +146,7 @@ class QAOAOptimizer:
         print("Preprocessing time for queries: {}".format(time.time() - time_start))
 
     def optimize(self, method=None, init_value=None, **kwargs):
-        """
-        Optimizing over the parameters with respect to the total energy function.
-        """
+        """Optimizing over the parameters with respect to the total energy function."""
         if init_value is None:
             init_value = self.params
         elif init_value == 'zeros':
@@ -171,15 +161,16 @@ class QAOAOptimizer:
                                 options={
                                     'disp': False,
                                     'maxiter': kwargs.get('num_calls', 100)
-                                })
+        })
         params = res.x
         value = res.fun
         self.params = params
         return value, params
 
     def query(self, params=None, noise_config=None, clauses_list=None, **kwargs):
-        """
-        Querying of the total energy corresponding to a specific set of values of the parameters. If `None`, the internal parameter values will be used.
+        """Querying of the total energy corresponding to a specific set of values of the parameters.
+
+        If `None`, the internal parameter values will be used.
         """
 
         if params is None:
@@ -198,5 +189,5 @@ class QAOAOptimizer:
 
     def optimum(self):
         x = min(itertools.product([0, 1], repeat=len(self.lst_var)),
-                   key=lambda a: self.energy(a))
+                key=lambda a: self.energy(a))
         return self.energy(x), x

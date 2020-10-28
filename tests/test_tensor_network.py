@@ -1,4 +1,4 @@
-from copy import copy, deepcopy
+from copy import deepcopy
 import numpy
 import unittest
 from acqdp.tensor_network import TensorNetwork
@@ -20,7 +20,7 @@ class TensorNetworkTestCase(unittest.TestCase):
     def test_mps(self):
         c = TensorNetwork()
         for i in range(10):
-            c.add_node(i, [i, (i, 'o'), (i+1) % 10], numpy.ones((2, 3, 2)))
+            c.add_node(i, [i, (i, 'o'), (i + 1) % 10], numpy.ones((2, 3, 2)))
             c.open_edge((i, 'o'))
         self.assertEqual(c.shape, tuple([3] * 10))
 
@@ -46,7 +46,7 @@ class TensorNetworkTestCase(unittest.TestCase):
         peps = TensorNetwork()
         for i in range(3):
             for j in range(3):
-                peps.add_node((i, j), [(i, j, 'h'), ((i+1) % 3, j, 'h'), (i, j, 'v'), (i, (j+1) % 3, 'v'), (i, j, 'o')])
+                peps.add_node((i, j), [(i, j, 'h'), ((i + 1) % 3, j, 'h'), (i, j, 'v'), (i, (j + 1) % 3, 'v'), (i, j, 'o')])
                 peps.open_edge((i, j, 'o'))
 
         self.assertEqual(peps.shape, tuple([None] * 9))
@@ -97,11 +97,11 @@ class TensorNetworkTestCase(unittest.TestCase):
     def test_basic_contraction(self):
         a = TensorNetwork()
         a.add_node(0, [0, 1], numpy.ones((2, 2)))
-        self.assertTrue(numpy.isclose(a.contract(), 4+0j))
+        self.assertTrue(numpy.isclose(a.contract(), 4 + 0j))
         a.add_node(1, [0, 1], numpy.ones((2, 2)))
-        self.assertTrue(numpy.isclose(a.contract(), 4+0j))
-        a.update_node(1, numpy.array([[70168, 52*1j], [65.77, -1e-3]]))
-        self.assertTrue(numpy.isclose(a.contract(), 70233.769+52*1j))
+        self.assertTrue(numpy.isclose(a.contract(), 4 + 0j))
+        a.update_node(1, numpy.array([[70168, 52 * 1j], [65.77, -1e-3]]))
+        self.assertTrue(numpy.isclose(a.contract(), 70233.769 + 52 * 1j))
 
     def test_matmul(self):
         a = TensorNetwork()
@@ -109,16 +109,16 @@ class TensorNetworkTestCase(unittest.TestCase):
         a.open_edge(0)
         for i in range(100):
             random_mat = numpy.random.rand(2, 2)
-            a.add_node(i, [i, i+1], random_mat)
+            a.add_node(i, [i, i + 1], random_mat)
             if i > 0:
                 a.close_edge(i)
-            a.open_edge(i+1)
+            a.open_edge(i + 1)
             res = res.dot(random_mat)
         self.assertTrue(numpy.allclose(res, a.contract()))
 
     def test_single_tensor(self):
         a = TensorNetwork()
-        a.add_node('X', [0], numpy.array([1,0]), is_open=True)
+        a.add_node('X', [0], numpy.array([1, 0]), is_open=True)
         self.assertTrue(numpy.allclose(a.contract('khp'), [1, 0]))
 
     def test_transpose(self):
@@ -130,7 +130,7 @@ class TensorNetworkTestCase(unittest.TestCase):
         a.open_edge(2)
         perm = (2, 0, 1)
         self.assertTrue(numpy.allclose((a % perm).contract(),
-                        numpy.transpose(b, perm)))
+                                       numpy.transpose(b, perm)))
 
     def test_fix_index(self):
         a = TensorNetwork()
@@ -183,6 +183,7 @@ class TensorNetworkTestCase(unittest.TestCase):
         c.open_edge(1)
         a.fix_edge(0)
         self.assertTrue(numpy.allclose(c.contract(), numpy.array([[1, 0], [0, 0]])))
+
 
 class TensorNetworkGraphTestCase(unittest.TestCase):
     def setUp(self):
