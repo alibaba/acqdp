@@ -67,7 +67,7 @@ class ContractionScheme:
             {
                 'contractions': [l for l in self.order],
                 'slices': [l for l in self.slices],
-                'cost': [self.cost.s, self.cost.t, self.cost.k]
+                'cost': [int(self.cost.s), int(self.cost.t), int(self.cost.k)]
             },
             f,
             indent=4)

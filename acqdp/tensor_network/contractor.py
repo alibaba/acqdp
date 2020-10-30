@@ -86,7 +86,7 @@ class Contractor:
                     res = numpy.moveaxis(lhs[0][1], kwargs['fix_idx'],
                                          range(len(kwargs['fix_idx'])))[tuple(
                                              [a[0] for a in kwargs['fix_to']])]
-                    rhs[0] = (lhs[0][0], res)
+                    rhs[0] = (lhs[0][0], numpy.array(res))
                 else:
                     if operation == 'c':
                         init_norm = sum([l[0][0] for l in lhs])
