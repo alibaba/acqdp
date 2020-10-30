@@ -77,17 +77,11 @@ Example and test codes
 You are ready to go! Find some examples at https://github.com/alibaba/acqdp/tree/master/examples and
 https://github.com/alibaba/acqdp/tree/master/demo
 
-To run the example in the examples folder examples/foo.py, run the following command in the home folder:
+To run the example in the examples, for example `GHZ.py`, simply run the following command in the examples folder:
 
 .. code-block:: bash
 
-   python examples/foo.py
-
-For example, we can run the script `ghz.py` in the examples folderby the following code:
-
-.. code-block:: bash
-
-   python examples/ghz.py
+   python examples/GHZ.py
 
 
 To see if the package passes all the tests, simply run :command:`python -m pytest`.
