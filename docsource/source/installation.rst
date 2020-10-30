@@ -4,9 +4,12 @@
 Overview
 =================
 
-Alibaba-Cloud Quantum Development Platform (ACQDP) is a quantum computing framework written in Python with the aim of realizing the potential of quantum computing in research, education and business.
+ACQDP is an open-source simulator-driven development tool for quantum algorithms and quantum computers. The initial release of ACQDP in October 2020 features Alibaba Quantum Laboratory’s general-purpose, tensor-contraction based  quantum circuit simulator, together with some applications on quantum algorithm and error correction simulations. Some future directions of ACQDP of higher prioritites are
 
-
+1. Strengthening the capabilities of the simulator, in terms of the scale of the target circuits, and allowing approximations.
+2. Improving the capabilities for and expanding the scope of applications.
+3. Developing friendly user interfaces for both the educational and research communities.
+4. Adding utilities facilitating the deployment in various computing environments.
 
 =================
 Installation
@@ -22,10 +25,10 @@ Installation
 Prerequisites
 ***************************
 
-`Python <https://docs.python-guide.org/>`__ - version 3.7 or later is required. 
+`Python <https://docs.python-guide.org/>`__ - version 3.7 or later is required.
 
-`Cython <https://cython.org>`__ (optional) - used in the acqdp to accelerate the software package `KaHyPar <https://github.com/kahypar>`__ used in contraction order finding. 
-In a command window, run 
+`Cython <https://cython.org>`__ (optional) - used in the acqdp to accelerate the software package `KaHyPar <https://github.com/kahypar>`__ used in contraction order finding.
+In a command window, run
 
 .. code-block:: bash
 
@@ -33,8 +36,8 @@ In a command window, run
 
 `boost <https://www.boost.org>`__ - C++ boost library, particularly the `program_options <https://www.boost.org/doc/libs/1_58_0/doc/html/program_options.html>`__ library
 
-`KaHyPar python package <https://kahypar.org>`__  (Windows) - On non-Windows systems, it installs automatically 
-when installing acqdp but it'll error out on Windows. To make it work on Windows, you'll need manually install Kahypar 
+`KaHyPar python package <https://kahypar.org>`__  (Windows) - On non-Windows systems, it installs automatically
+when installing acqdp but it'll error out on Windows. To make it work on Windows, you'll need manually install Kahypar
 first following its instructions `here <https://github.com/kahypar/kahypar#the-python-interface>`__. Alternatively, you
 can use `Windows Subsystem for Linux <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`__
 
@@ -42,10 +45,10 @@ Installation from PyPI
 **************************
 
 ACQDP packages are published on the `Python Package Index <https://pypi.org/project/ACQDP/>`__ and can be installed using `pip`.
-This is the recommended way for most users. However, if you'd like to see or modify the source code, proceed to the next section 
+This is the recommended way for most users. However, if you'd like to see or modify the source code, proceed to the next section
 `Installation from source code`_
 
-In a command window, run 
+In a command window, run
 
 .. code-block:: bash
 
@@ -54,7 +57,7 @@ In a command window, run
 Installation from source code
 *****************************
 
-Alternative, you can install from source code, say, cloned from `Github <https://github.com/alibaba/acqdp>`__ so you can see and modify the code. 
+Alternatively, you can install from source code, say, cloned from `Github <https://github.com/alibaba/acqdp>`__ so you can see and modify the code.
 First clone the repo
 
 .. code-block:: bash

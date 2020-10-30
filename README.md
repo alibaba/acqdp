@@ -1,7 +1,12 @@
 # Alibaba Cloud Quantum Development Platform (ACQDP)
 
 ## Introduction
-ACQDP is an open-source platform designed for quantum computing. ACQDP provides a set of tools for aiding the development of both quantum computing algorithms and quantum processors, and is powered by an efficient tensor-network-based large-scale classical simulator.
+ACQDP is an open-source simulator-driven development tool for quantum algorithms and quantum computers. The initial release of ACQDP in October 2020 features Alibaba Quantum Laboratory’s general-purpose, tensor-contraction based  quantum circuit simulator, together with some applications on quantum algorithm and error correction simulations. Some future directions of ACQDP of higher prioritites are
+
+1. Strengthening the capabilities of the simulator, in terms of the scale of the target circuits, and allowing approximations.
+2. Improving the capabilities for and expanding the scope of applications.
+3. Developing friendly user interfaces for both the educational and research communities.
+4. Adding utilities facilitating the deployment in various computing environments.
 
 ## Computing Engine
 Partially inspired by the recent quantum supremacy experiment, classical simulation of quantum circuits attracts quite a bit of attention and impressive progress has been made along this line of research to significantly improve the performance of classical simulation of quantum circuits. Key ingredients include
