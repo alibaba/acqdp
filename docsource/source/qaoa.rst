@@ -124,7 +124,7 @@ If the WCSP instance on which you run the QAOA is not in the right format strang
 
 gives the output:
 
-.. code-block:: python
+.. code-block::
 
     Instance has to be a dictionary and it has type <class `NoneType`>
 

@@ -832,9 +832,7 @@ class Circuit(Operation):
     @property
     def operations_by_time(self):
         """Return an :class:`OrderedDict` of dicts, which is an reorganization of :attr:`operations_by_name` such that
-        ``c.operations_by_time[t][name]
-
-        == c.operations_by_name[name]``, where ``t`` is the time step of the
+        ``c.operations_by_time[t][name]== c.operations_by_name[name]``, where ``t`` is the time step of the
         operation in question.
 
         The returned ``OrderedDict`` in ordered by increasing time.

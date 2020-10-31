@@ -4,5 +4,11 @@ ignore = C901, #is too complex
     E402, # module level import not at top of file
     W503 # line break before binary operator
 
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist
+
 max-complexity = 15
 max-line-length = 127
