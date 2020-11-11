@@ -70,7 +70,7 @@ Our packages aims at efficient `exact` tensor network contraction, i.e. no appro
 Order finding
 ----------------
 
-One way of tensor network contraction is to merge two tensor nodes into one at a time, until only one tensor is left as the outcome. The cost for such method is determined by the stepwise cost. Such method can be formulated as a binary contraction tree with each node representing a pairwise contraction step. Our algorithm uses the method first introduced in [GK20]_ to construct efficient contraction trees using hypergraph decomposition. A preliminary order finding scheme is given in :class:`OrderFinder` when the tensor network is relatively small. More advanced, hypergraph-decomposition-based order finding approach is given in :class:`KHPOrderFinder`.
+One way of tensor network contraction is to merge two tensor nodes into one at a time, until only one tensor is left as the outcome. The cost for such method is determined by the stepwise cost. Such method can be formulated as a binary contraction tree with each node representing a pairwise contraction step. Our algorithm uses the method first introduced in [GK20]_ to construct efficient contraction trees using hypergraph decomposition. A preliminary order finding scheme is given in :class:`OrderFinder` when the tensor network is relatively small. :class:`OptEinsumOrderFinder` provides more choices of order finding methods implemented in the `opt_einsum` package. More advanced, hypergraph-decomposition-based order finding approach is given in :class:`KHPOrderFinder`.
 
 Sometimes, a fully serialized contraction tree can be too costly to be carried out due to time / space constraints; for a complex tensor network, it is possible that whatever contraction tree one finds would result in an intermediate result that is well beyond the space of a laptop. We introduced the idea of index slicing in [CZH+18]_ for parallelization that helps both on running the contraction scheme concurrently, and on relieving the hard space constraint. The slicing method is provided in the class :class:`Slicer`, and integrated to the order finding scheme as :class:`SlicedOrderFinder`.
 
@@ -80,6 +80,9 @@ As a result of its execution, a call to `find_order` would yield :class:`Contrac
 
 .. autoclass:: acqdp.tensor_network.OrderFinder
    :members: find_order
+
+.. autoclass:: acqdp.tensor_network.OptEinsumOrderFinder
+   :show-inheritance:
 
 .. autoclass:: acqdp.tensor_network.KHPOrderFinder
    :show-inheritance:

@@ -126,9 +126,10 @@ class OrderResolver:
         return path, ContractionCost(path_info.opt_cost,
                                      path_info.largest_intermediate)
 
-    def path_to_paired_order(self, order, path, counter):
+    def path_to_paired_order(self, order, path, counter=None):
         lhs, rhs = copy.copy(order[0]), order[1]
-        # print(lhs, rhs)
+        if counter is None:
+            counter = OrderCounter()
         new_order = []
         for i in path:
             try:
