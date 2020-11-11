@@ -1,6 +1,7 @@
 from acqdp.tensor_network import TensorNetwork
 from scipy import optimize
 import numpy
+import tqdm
 import time
 import itertools
 
@@ -134,7 +135,7 @@ class QAOAOptimizer:
         self.query_dict = {}
         self.data_dict = {}
         self.clauses = kwargs.get('clauses', self.clauses)
-        for clause in self.clauses:
+        for clause in tqdm.tqdm(self.clauses):
             m = 1
             if isinstance(clause, dict):
                 m = clause['weight']
@@ -176,7 +177,7 @@ class QAOAOptimizer:
             params = self.params
         self.decorate(params)
         res = []
-        for i in self.query_dict:
+        for i in tqdm.tqdm(self.query_dict):
             res.append(self.query_dict[i].execute(**kwargs))
         res = sum(res)
         print("E({}) = {}".format(list(params), res))
