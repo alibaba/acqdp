@@ -1,4 +1,5 @@
 import sys
+import opt_einsum
 from acqdp.tensor_network.local_optimizer import defaultOrderResolver
 
 if sys.version_info < (3, 0):
@@ -59,6 +60,33 @@ class OrderFinder:
             yield res
 
 
+class OptEinsumOrderFinder(OrderFinder):
+    """
+    :class: `OptEinsumOrderFinder` finds an unsliced contraction scheme based on the built-in method in `opt_einsum`,
+    called `opt_einsum.contract_path`.
+    :ivar optimize: The argument `optimize` for `opt_einsum.contract_path`.
+    """
+
+    def __init__(self,
+                 optimize='greedy',
+                 **kwargs):
+        self.optimize = optimize
+
+    def find_order(self, tn, **kwargs):
+        tn = tn._expand_and_delta()
+        while True:
+            lhs, rhs, shapes = tn.subscripts()
+            path, _ = opt_einsum.contract_path(','.join(lhs) + '->' + rhs,
+                                               *shapes,
+                                               shapes=True,
+                                               optimize=self.optimize)
+            if len(tn.nodes_by_name) > 1:
+                order = defaultOrderResolver.path_to_paired_order([list(tn.nodes_by_name), '#'], path)
+            else:
+                order = []
+            yield defaultOrderResolver.order_to_contraction_scheme(tn, order)
+
+
 class SlicedOrderFinder(OrderFinder):
     """
     :class: `SlicedOrderFinder` finds a sliced contraction scheme based on unsliced contraction schemes found by its base
@@ -95,6 +123,7 @@ def get_order_finder(**kwargs):
     order_finders = {
         'khp': KHPOrderFinder,
         'default': OrderFinder,
+        'oe': OptEinsumOrderFinder,
         'sliced': SlicedOrderFinder
     }
     order_finder_name = kwargs.get('order_finder_name', 'default')
