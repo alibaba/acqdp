@@ -35,15 +35,14 @@ class OrderFinder:
             optionally the total contraction cost.
         """
         tn = tn._expand_and_delta()
-        if self.order_method == 'default':
-            a = lambda b: b  # noqa: E731
-        elif self.order_method == 'vertical':
-            qubit_order = kwargs.get('qubit_order', sorted(set(b[1] for b in tn.nodes_by_name)))
-            a = lambda b: (qubit_order.index(b[1]), b[0], b[2:])  # noqa: E731
-        else:
-            raise ValueError("order method not implemented")
         try:
-            nodes_list = sorted(tn.nodes_by_name, key=a)
+            if self.order_method == 'default':
+                nodes_list = sorted(tn.nodes_by_name)
+            elif self.order_method == 'vertical':
+                qubit_order = kwargs.get('qubit_order', sorted(set(b[1] for b in tn.nodes_by_name)))
+                nodes_list = sorted(tn.nodes_by_name, key=lambda b: (qubit_order.index(b[1]), b[0], b[2:]))
+            else:
+                raise ValueError("order method not implemented")
         except TypeError:
             nodes_list = sorted(tn.nodes_by_name, key=lambda x: str(x))
         o = []
