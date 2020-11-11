@@ -16,6 +16,7 @@ class Compiler:
     :ivar patch_size: Whenever two adjacent branches both have size less than the patch size, the branches are merged
         together. This is to avoid inefficiency called by skewed tensor shapes in tensor multiplication, with a slight
         sacrifice in floating number operations.
+    :ivar memory: Memory constraint for the machine(s) running the contraction, in GigaBytes. Set to 16GiB by default.
     :ivar reorg_thres: Threshold for contraction order reorganization. The order is seperated into small tensor
         multiplications and large tensor multiplications. All pairwise tensor multiplications involving tensors with size
         less than `reorg_thres` will be put forward whenever possible.
@@ -25,10 +26,12 @@ class Compiler:
                  reorg_thres=23,
                  patch_size=5,
                  do_patch=False,
+                 memory=16,
                  **kwargs):
         self.reorg_thres = reorg_thres
         self.patch_size = patch_size
         self.do_patch = do_patch
+        self.memory = memory
 
     def compile(self, tn, scheme, **kwargs):
         """
@@ -40,6 +43,10 @@ class Compiler:
         :returns: :class:`ContractionTask` -- The compiled contraction task ready for execution.
         """
         tn = tn._expand_and_delta()
+        cost = scheme.cost
+        if cost.t * 3 * 2**4 > self.memory * 2**30:
+            raise RuntimeError("The contraction cannot be done on the current machine."
+                               + " Try finding a more space-efficient order, or slice the order to fit in the memory.")
         res = self._generate_template(tn, scheme=scheme, **kwargs)
         res.set_data({
             node: tn.network.nodes[(0, node)]['tensor'].contract()
