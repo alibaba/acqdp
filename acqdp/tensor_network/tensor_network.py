@@ -1,5 +1,6 @@
 import copy
 import networkx
+import warnings
 from collections import OrderedDict
 from .tensor_valued import TensorValued, DTYPE
 import numpy
@@ -93,6 +94,12 @@ class TensorNetwork(TensorValued):
             with open(output_file, 'w') as f:
                 res.dump(f)
                 print("Order result saved at " + output_file)
+        if hasattr(res, 'cost') and res.cost.t > 2**29:
+            warnings.warn(
+                "The contraction of this tensor network is likely to exceed the memory constraint of 16GB."
+                + " Please proceed with caution, or use alternative order finding methods.",
+                ResourceWarning
+            )
         return res
 
     def compile(self, order, **kwargs):
