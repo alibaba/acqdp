@@ -68,8 +68,7 @@ class QAOAOptimizer:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    @classmethod
-    def lightcone(cls, qubits, csp, num_layers):
+    def lightcone(self, qubits, csp, num_layers):
         """Construct simplified tensor network corresponding to all QAOA circuit element acting non-trivially on a set
         of qubits."""
         qubits_set = set(qubits)
@@ -77,16 +76,16 @@ class QAOAOptimizer:
         tn = TensorNetwork(dtype=complex)
         for i in range(num_layers):
             for qubit in qubits_set:
-                tn.add_node((i + 1, qubit, False), [(i, qubit), (i + 1, qubit)], None)
-                tn.add_node((-i - 1, qubit, False), [(-i, qubit), (-i - 1, qubit)], None)
+                tn.add_node((2 * i + 1, qubit), [(i, qubit), (i + 1, qubit)], None)
+                tn.add_node((-2 * i - 1, qubit), [(-i, qubit), (-i - 1, qubit)], None)
             clauses = []
             new_set = set()
             for clause in csp:
                 if set(clause).intersection(qubits_set):
                     clauses.append(clause)
                     new_set |= set(clause)
-                    tn.add_node((i + 1, clause, True), [(i + 1, q) for q in clause], None)
-                    tn.add_node((-i - 1, clause, True), [(-i - 1, q) for q in clause], None)
+                    tn.add_node((2 * i + 2, clause), [(i + 1, q) for q in clause], None)
+                    tn.add_node((-2 * i - 2, clause), [(-i - 1, q) for q in clause], None)
             turns.update({qubit: i + 1 for qubit in new_set.difference(qubits_set)})
             qubits_set |= new_set
         for qubit in turns:
@@ -115,16 +114,16 @@ class QAOAOptimizer:
         tn, set_qubits = self.lightcone(clause, self.csp, self.num_layers)
         multiplier = kwargs.get('multiplier', 1)
         multiplier *= 2 ** (-len(set_qubits))
-        tn.add_node((0, clause, True), [(0, i) for i in clause], None)
+        tn.add_node((0, clause), [(0, i) for i in clause], None)
         task = tn.compile(tn.find_order(**kwargs), **kwargs)
         dic = {}
         for k in tn.nodes_by_name:
             if k[0] == 0:
                 dic[k] = [multiplier * numpy.array(self.data[(0, clause)][0])]
-            elif k[2]:
-                dic[k] = self.data[(k[0], k[1])]
+            elif k[0] % 2 == 0:
+                dic[k] = self.data[(k[0] // 2, k[1])]
             else:
-                dic[k] = self.data[k[0]]
+                dic[k] = self.data[(k[0] + (1 if k[0] > 0 else -1)) // 2]
         return {clause: task}, {clause: dic}
 
     def preprocess(self, **kwargs):
@@ -176,7 +175,9 @@ class QAOAOptimizer:
         if params is None:
             params = self.params
         self.decorate(params)
-        res = [self.query_dict[i].execute(**kwargs) for i in self.query_dict]
+        res = []
+        for i in self.query_dict:
+            res.append(self.query_dict[i].execute(**kwargs))
         res = sum(res)
         print("E({}) = {}".format(list(params), res))
         return res
