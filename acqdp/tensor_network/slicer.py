@@ -45,9 +45,10 @@ class Slicer:
                 tn = tnc.copy()
                 y = min(orders, key=lambda a: (a.cost, orders.index(a)))
                 slice_edges = []
-                print(f'Process {num_process} initial cost: {y.cost}', flush=True)
                 y = self.local_optimizer.optimize(
                     tn, y, self.num_iter_before)
+                print(f'Process {num_process} initial cost: {y.cost}',
+                      flush=True)
                 while y.cost.t > 2**self.max_tw:
                     y = self.local_optimizer.optimize(
                         tn, y, self.num_iter_middle)
