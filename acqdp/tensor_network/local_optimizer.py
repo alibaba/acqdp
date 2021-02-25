@@ -131,10 +131,13 @@ class OrderResolver:
         if counter is None:
             counter = OrderCounter()
         new_order = []
-        for i in path:
+        for idx, i in enumerate(path):
             try:
                 if len(i) == 1:
-                    return [[[lhs.pop(i[0])], rhs]]
+                    if idx != len(path) - 1:
+                        lhs.append(lhs.pop(i[0]))
+                    else:
+                        new_order.append([[lhs.pop(i[0])], rhs])
                 else:
                     new_order.append([[lhs[i[0]], lhs[i[1]]], counter.cnt])
                     lhs.pop(max(i[0], i[1]))

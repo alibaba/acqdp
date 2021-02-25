@@ -151,7 +151,10 @@ class ContractionTree:
                 self.inter_names.append(ss[3].name)
                 g.add_node(i + 1, branch=ss[0])
                 for n in ss[2]:
-                    g.add_edge(i + 1 if i < ll - 1 else -1, edges_dic[n], name=n)
+                    try:
+                        g.add_edge(i + 1 if i < ll - 1 else -1, edges_dic[n], name=n)
+                    except KeyError:
+                        return None
                     del edges_dic[n]
                 for n in ss[1]:
                     edges_dic[n] = i + 1
