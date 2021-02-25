@@ -12,9 +12,9 @@ ACQDP is an open-source simulator-driven development tool for quantum algorithms
 Partially inspired by the recent quantum supremacy experiment, classical simulation of quantum circuits attracts quite a bit of attention and impressive progress has been made along this line of research to significantly improve the performance of classical simulation of quantum circuits. Key ingredients include
 1. Quantum circuit simulation as tensor network contraction [[1]](#1);
 2. Undirected graph model formalism[[2]](#2);
-3. Dynamic slicing [[3]](#3);
-4. Contraction tree [[4]](#4);
-5. Contraction subtree reconfiguration [[5]](#5).
+3. Dynamic slicing [[3]](#3)[[4]](#4);
+4. Contraction tree [[5]](#5);
+6. Contraction subtree reconfiguration [[6]](#6).
 
 We are happy to be part of this effort.
 
