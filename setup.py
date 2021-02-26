@@ -6,10 +6,8 @@ this_dir = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(this_dir, "README.md"), "r") as fh:
     long_description = fh.read()
 
-zip_safe = True
 try:
     from Cython.Build import cythonize
-    zip_safe = False
 except ImportError:
     print('Installing QDP without Cython...')
 
@@ -30,7 +28,7 @@ setup(
     package_data={'acqdp': ['*.ini', '*.json']},
     include_package_data=True,
     ext_modules=cythonize('acqdp/utility/*.pyx'),
-    zip_safe=zip_safe,
+    zip_safe=False,
     install_requires=[
         'numpy',
         'scipy',
