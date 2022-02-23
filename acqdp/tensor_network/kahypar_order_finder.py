@@ -110,7 +110,8 @@ class KHPOrderFinder(OrderFinder):
                     break
         return order, counter
 
-    def find_order(self, graph):
+    def find_order(self, tn):
+        graph = tn
         graph_copy = graph._expand_and_delta()
         graph_copy.fix()
         init_order, counter = self._simplify(graph_copy)
