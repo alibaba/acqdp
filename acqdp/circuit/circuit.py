@@ -829,6 +829,72 @@ class Circuit(Operation):
                                          "qubits": qubits}
         return self
 
+    def collapse(self):
+        """Collapse a circuit to a single operation.
+
+        This method removes all operations in the current circuit, and replace
+        them with one single opeartion, either a ``PureState'' or a ``State''
+        representing the obtained from contracting the tensor network
+        corresponding to the original circuit.
+
+        Currently only works for circuits with no input wires, i.e. ones that
+        corresponds to a quantum state. The final circuit contains a `PureState`
+        if `self.is_pure == True` and a `State` otherwise.
+
+        :raises ValueError: if the circuit has input wires
+        """
+        qubits, _ = self._input_indices
+        if len(qubits) > 0:
+            raise ValueError("Currently only support collapsing states.")
+        qubits, _ = self._output_indices
+        if self.is_pure:
+            state_vector = self.tensor_pure.contract()
+            self.operations_by_name = {}
+            self.append(PureState(len(qubits), np.array(state_vector)), qubits)
+        else:
+            state_matrix = self.tensor_density.contract()
+            self.operations_by_name = {}
+            self.append(State(len(qubits), np.array(state_matrix)), qubits)
+        return self
+
+    def measure(self,
+                qubit_index: int,
+                remove_qubit: Optional[bool] = False,
+                collapse: Optional[bool] = True):
+        """Measure a given qubit. Return the one-bit measurement result and the
+        conditional quantum state as a `Circuit` object.
+
+        :param qubit_index: Index of the qubit to be measured.
+        :type qubit_index: int
+        :param remove_qubit: Whether the measured qubit is removed from the
+        circuit. If set to `False` the qubit will remain in the circuit in the
+        corresponding collapsed computational state. Defaults to False.
+        :type remove_qubit: bool, optional
+        :param collapse: If set to `True`, the result circuit will be a circuit
+        with a single operation representing the conditional state. If set to
+        `False`, the result circuit will be the original circuit with the measured
+        qubit reset to the outcome, with proper normalizations. Defaults to True.
+        :type collapse: bool, optional
+
+        :returns: bool, :class:`Circuit`
+        """
+        circuit_copy = copy(self)
+        circuit_copy.append(OneMeas, [qubit_index])
+        for i in circuit_copy._output_indices[0]:
+            if i != qubit_index:
+                circuit_copy.append(Trace, [i])
+        prob_1 = np.real(circuit_copy.tensor_density.contract())
+        outcome = np.random.binomial(1, prob_1)
+        prob = [1 - prob_1, prob_1][outcome]
+        new_circuit = copy(self).append(CompMeas[outcome], [qubit_index])
+        new_circuit.append(Unitary(0, np.array(1 / np.sqrt(prob))), [])
+        if not remove_qubit:
+            new_circuit.append(CompState[outcome], [qubit_index])
+        if collapse:
+            new_circuit.collapse()
+
+        return outcome, new_circuit
+
     @property
     def operations_by_time(self):
         """Return an :class:`OrderedDict` of dicts, which is an reorganization of :attr:`operations_by_name` such that
