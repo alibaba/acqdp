@@ -111,7 +111,7 @@ class SlicedOrderFinder(OrderFinder):
 
     def find_order(self, tn, **kwargs):
         tn = tn._expand_and_delta()
-        order_gen = self.base_order_finder.find_order(graph=tn)
+        order_gen = self.base_order_finder.find_order(tn=tn)
         next(order_gen)
         while True:
             res = self.slicer.slice(tn, order_gen)
