@@ -256,3 +256,84 @@ class CircuitTestCase(unittest.TestCase):
         for i in range(3):
             c_manual.append(noise_channel, [i])
         self.assertTrue(np.allclose(c_noisy.tensor_density.contract(), c_manual.tensor_density.contract()))
+
+    def test_collapse(self):
+        c = circuit.Circuit()
+        c.append(circuit.ZeroState, [0])
+        c.append(circuit.ZeroState, [1])
+        c.append(circuit.ZeroState, [2])
+        for i in range(3):
+            c.append(circuit.HGate, [i])
+        c.append(circuit.CZGate, [0, 1])
+        c.append(circuit.CZGate, [0, 2])
+        c.collapse()
+        self.assertTrue(
+            np.allclose(c.tensor_pure.contract(),
+                        c.collapse().tensor_pure.contract()))
+
+        c = circuit.Circuit()
+        c.append(circuit.ZeroState, [0])
+        c.append(circuit.ZeroState, [1])
+        c.append(circuit.ZeroState, [2])
+        for i in range(3):
+            c.append(circuit.HGate, [i])
+        c.append(circuit.CZGate, [0, 1])
+        c.append(circuit.CZGate, [0, 2])
+        noise_channel = circuit.Depolarization(0.5, 0.1, 0.15)
+        c_noisy = noise.add_noise(c, noise_channel)
+        self.assertTrue(
+            np.allclose(c_noisy.tensor_density.contract(),
+                        c_noisy.collapse().tensor_density.contract()))
+
+    def test_measure(self):
+        c = circuit.Circuit()
+        c.append(circuit.ZeroState, [0])
+        b, d = c.measure(0)
+        self.assertEqual(b, 0)
+        self.assertTrue(
+            np.allclose(d.tensor_pure.contract(), np.array([1, 0])))
+
+        c = circuit.Circuit()
+        c.append(circuit.ZeroState, [0])
+        b, d = c.measure(0, True)
+        self.assertEqual(b, 0)
+        self.assertTrue(
+            np.allclose(d.tensor_pure.contract(), np.array(1)))
+
+        c = circuit.Circuit()
+        c.append(circuit.ZeroState, [0])
+        c.append(circuit.ZeroState, [1])
+        c.append(circuit.HGate, [0])
+        c.append(circuit.CNOTGate, [0, 1])
+        b, c = c.measure(0)
+        e, c = c.measure(1)
+        self.assertEqual(b, e)
+
+        c = circuit.Circuit()
+        c.append(circuit.ZeroState, [0])
+        c.append(circuit.ZeroState, [1])
+        c.append(circuit.HGate, [0])
+        c.append(circuit.CNOTGate, [0, 1])
+        b, c = c.measure(0, True)
+        e, c = c.measure(1, True)
+        self.assertEqual(b, e)
+
+        c = circuit.Circuit()
+        c.append(circuit.ZeroState, [0])
+        c.append(circuit.ZeroState, [1])
+        c.append(circuit.HGate, [0])
+        c.append(circuit.CNOTGate, [0, 1])
+        b, c = c.measure(0, collapse=False)
+        e, c = c.measure(1, collapse=False)
+        self.assertEqual(b, e)
+
+        c = circuit.Circuit()
+        c.append(circuit.ZeroState, [0])
+        c.append(circuit.ZeroState, [1])
+        c.append(circuit.HGate, [0])
+        c.append(circuit.CNOTGate, [0, 1])
+        b, c = c.measure(0, True, False)
+        e, c = c.measure(1, True, False)
+        self.assertEqual(b, e)
+
+        pass
