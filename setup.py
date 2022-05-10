@@ -36,7 +36,7 @@ setup(
         'numexpr',
         'matplotlib',
         'opt_einsum',
-        'kahypar >= 1.1.0',
+        'kahypar == 1.1.2',
         'cma',
         'jax',
         'jaxlib',
