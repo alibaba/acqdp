@@ -36,7 +36,8 @@ class TensorNetwork(TensorValued):
         self.open_edges = []
         if open_edges is not None:
             for edge in open_edges:
-                self.open_edge(edge, bond_dim)
+                self.add_edge(edge, bond_dim)
+            self.open_edges += open_edges
         self.id_count = 0
         self.refresh_signature()
 
