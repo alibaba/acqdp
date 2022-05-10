@@ -175,6 +175,8 @@ class ContractionTree:
 
     def merge_nodes(self, width):
         br = self.branch_info()
+        if len(br) < 3:  # single branch
+            return
         if len(br[1]) >= len(br[2]):
             brb = [br[2], br[1]]
         else:
