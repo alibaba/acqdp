@@ -50,6 +50,11 @@ class Slicer:
                 print(f'Process {num_process} initial cost: {y.cost}',
                       flush=True)
                 while y.cost.t > 2**self.max_tw:
+                    if len(slice_edges) >= self.max_num_slice:
+                        break
+                    if numpy.log2(float(y.cost.t)) - self.max_tw + len(
+                            slice_edges) >= self.max_num_slice + 2:  # early termination
+                        break
                     y = self.local_optimizer.optimize(
                         tn, y, self.num_iter_middle)
                     k, order = self._biggest_weight_edge(tn, y.order)
@@ -59,11 +64,6 @@ class Slicer:
                     tn.fix()
                     y = defaultOrderResolver.order_to_contraction_scheme(tn, order)
                     y.cost.k = len(slice_edges)
-                    if len(slice_edges) >= self.max_num_slice:
-                        break
-                    if numpy.log2(float(y.cost.t)) - self.max_tw + len(
-                            slice_edges) >= self.max_num_slice + 2:  # early termination
-                        break
                 new_y = self.local_optimizer.optimize(
                     tn, y, self.num_iter_after)
                 new_y.cost.k = len(slice_edges)
