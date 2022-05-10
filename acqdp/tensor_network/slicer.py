@@ -74,6 +74,8 @@ class Slicer:
                           flush=True)
                     return ContractionScheme(y.order, slice_edges, cost=y.cost)
                 else:
+                    print(f'Process {num_process} failed. Please consider alternative order finding methods',
+                          flush=True)
                     return None
             except KeyboardInterrupt:
                 return None
